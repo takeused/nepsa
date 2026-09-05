@@ -217,15 +217,28 @@ describe('100점 환산', () => {
   it('가중치를 반영한다', () => {
     // 시장규모(25%)만 5점, 나머지 기대성과 지표는 1점
     const p = flat(1, { raw: { ...rawFor(1), marketSize: 6000 } });
-    // 5점 지표 25% × 100 + 1점 지표 75% × 20 = 25 + 15 = 40
-    expect(axisScore(p, 'return', settings)).toBeCloseTo(40);
+    // five: 5점 지표 25% × 100 + 1점 지표 75% × 20 = 25 + 15 = 40
+    expect(axisScore(p, 'return', { ...settings, normalization: 'five' })).toBeCloseTo(40);
+    // zero: 5점 지표 25% × 100 + 1점 지표 75% × 0 = 25
+    expect(axisScore(p, 'return', { ...settings, normalization: 'zero' })).toBeCloseTo(25);
   });
 
   it('지표가 하나라도 비면 null이다', () => {
     const p = flat(3);
     delete p.scores.impact;
     expect(axisScore(p, 'return', settings)).toBeNull();
-    expect(axisScore(p, 'risk', settings)).toBeCloseTo(60);
+    expect(axisScore(p, 'risk', settings)).toBeCloseTo(50); // 기본 환산에서 3점 → 50
+  });
+
+  it('기본 환산은 (n−1)÷4×100이고 0~100 전 구간을 쓴다', () => {
+    // ÷5×100은 최저가 20점이라 매트릭스의 S 영역(위험<25)과 최하단 행에
+    // 사실상 도달할 수 없다. 기본값을 되돌리면 이 테스트가 실패한다.
+    expect(defaultSettings.normalization).toBe('zero');
+    expect(axisScore(flat(1), 'risk', defaultSettings)).toBeCloseTo(0);
+    expect(axisScore(flat(5), 'risk', defaultSettings)).toBeCloseTo(100);
+    expect(axisScore(flat(1), 'risk', { ...settings, normalization: 'five' })).toBeCloseTo(20);
+    // 전 지표 최저점인 과제가 기본 환산에서는 S 영역에 들어간다
+    expect(classify(100, axisScore(flat(1), 'risk', defaultSettings)!, 'company').region).toBe('S');
   });
 
   it('직접 입력 모드는 0~100 범위만 받는다', () => {

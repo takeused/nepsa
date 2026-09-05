@@ -1,6 +1,9 @@
 export type ProjectType = 'company' | 'research';
 export type Settings = { normalization: 'five' | 'zero'; sorting: 'grade' | 'region' };
-export const defaultSettings: Settings = { normalization: 'five', sorting: 'grade' };
+// 기본 환산은 (n−1)÷4×100. ÷5×100은 산출 범위가 20~100으로 눌려 매트릭스의
+// S 영역(위험<25)과 최하단 행이 사실상 도달 불가능해진다. 원문에 산식이 없어
+// 두 방식을 모두 남기되 0~100 전 구간을 쓰는 쪽을 기본으로 둔다.
+export const defaultSettings: Settings = { normalization: 'zero', sorting: 'grade' };
 export type Project = { id: string; name: string; type: ProjectType; mode: 'direct' | 'criteria'; scores: Record<string, number | null>; raw: Record<string, number | null>; notes: Record<string, string>; directReturn: number | null; directRisk: number | null; sample?: boolean };
 export const criteria = [
  { id:'excellence',name:'기술적 수월성',axis:'return',weight:15,qualitative:true,description:'기술의 독창성 및 차별성',labels:['아주 낮음','낮음','보통','높음','매우 높음'] },

@@ -1,0 +1,457 @@
+{
+  "version": 1,
+  "settings": {
+    "normalization": "zero",
+    "sorting": "grade"
+  },
+  "projects": [
+    {
+      "id": "demo-01",
+      "name": "전고체 배터리용 황화물계 고체전해질 양산공정",
+      "type": "company",
+      "mode": "criteria",
+      "scores": {
+        "excellence": 5,
+        "application": 4,
+        "ip": 4,
+        "impact": 5,
+        "infrastructure": 2,
+        "barrier": 4,
+        "competition": 5,
+        "lifecycle": 1
+      },
+      "raw": {
+        "world": 1,
+        "marketSize": 120,
+        "growth": 38,
+        "margin": 9,
+        "current": 78,
+        "target": 95,
+        "years": 4,
+        "cost": 300
+      },
+      "notes": {
+        "summary": "차세대 이차전지 핵심 소재. 기술 난도와 경쟁 모두 높음. 시연용 가상 수치입니다. 실제 시장조사·기술수준 평가 결과가 아닙니다."
+      },
+      "directReturn": null,
+      "directRisk": null,
+      "sample": false
+    },
+    {
+      "id": "demo-02",
+      "name": "HBM용 초박형 다이 본딩 소재",
+      "type": "company",
+      "mode": "criteria",
+      "scores": {
+        "excellence": 4,
+        "application": 3,
+        "ip": 5,
+        "impact": 4,
+        "infrastructure": 1,
+        "barrier": 5,
+        "competition": 5,
+        "lifecycle": 2
+      },
+      "raw": {
+        "world": 1,
+        "marketSize": 95,
+        "growth": 31,
+        "margin": 14,
+        "current": 85,
+        "target": 96,
+        "years": 2.5,
+        "cost": 120
+      },
+      "notes": {
+        "summary": "고대역폭 메모리 후공정 소재. 선행특허 장벽이 매우 높음. 시연용 가상 수치입니다. 실제 시장조사·기술수준 평가 결과가 아닙니다."
+      },
+      "directReturn": null,
+      "directRisk": null,
+      "sample": false
+    },
+    {
+      "id": "demo-03",
+      "name": "차량용 라이다 수신광학계 국산화",
+      "type": "company",
+      "mode": "criteria",
+      "scores": {
+        "excellence": 3,
+        "application": 4,
+        "ip": 3,
+        "impact": 4,
+        "infrastructure": 2,
+        "barrier": 3,
+        "competition": 4,
+        "lifecycle": 1
+      },
+      "raw": {
+        "world": 1,
+        "marketSize": 42,
+        "growth": 24,
+        "margin": 7,
+        "current": 72,
+        "target": 88,
+        "years": 3,
+        "cost": 90
+      },
+      "notes": {
+        "summary": "자율주행 센서 부품. 수입 의존도 완화 목적. 시연용 가상 수치입니다. 실제 시장조사·기술수준 평가 결과가 아닙니다."
+      },
+      "directReturn": null,
+      "directRisk": null,
+      "sample": false
+    },
+    {
+      "id": "demo-04",
+      "name": "수소연료전지 금속분리판 내식 코팅",
+      "type": "company",
+      "mode": "criteria",
+      "scores": {
+        "excellence": 3,
+        "application": 3,
+        "ip": 3,
+        "impact": 4,
+        "infrastructure": 2,
+        "barrier": 3,
+        "competition": 3,
+        "lifecycle": 2
+      },
+      "raw": {
+        "world": 0,
+        "marketSize": 3200,
+        "growth": 17,
+        "margin": 6,
+        "current": 80,
+        "target": 92,
+        "years": 2,
+        "cost": 60
+      },
+      "notes": {
+        "summary": "수소 상용차 확대에 연동. 국내 시장 중심. 시연용 가상 수치입니다. 실제 시장조사·기술수준 평가 결과가 아닙니다."
+      },
+      "directReturn": null,
+      "directRisk": null,
+      "sample": false
+    },
+    {
+      "id": "demo-05",
+      "name": "산업용 협동로봇 고정밀 그리퍼",
+      "type": "company",
+      "mode": "criteria",
+      "scores": {
+        "excellence": 2,
+        "application": 4,
+        "ip": 2,
+        "impact": 3,
+        "infrastructure": 1,
+        "barrier": 2,
+        "competition": 4,
+        "lifecycle": 2
+      },
+      "raw": {
+        "world": 0,
+        "marketSize": 1400,
+        "growth": 11,
+        "margin": 5,
+        "current": 83,
+        "target": 90,
+        "years": 1.5,
+        "cost": 35
+      },
+      "notes": {
+        "summary": "단기 상용화 가능. 기술 차별성은 크지 않음. 시연용 가상 수치입니다. 실제 시장조사·기술수준 평가 결과가 아닙니다."
+      },
+      "directReturn": null,
+      "directRisk": null,
+      "sample": false
+    },
+    {
+      "id": "demo-06",
+      "name": "바이오의약품 연속배양 공정 플랫폼",
+      "type": "company",
+      "mode": "criteria",
+      "scores": {
+        "excellence": 4,
+        "application": 5,
+        "ip": 3,
+        "impact": 5,
+        "infrastructure": 3,
+        "barrier": 3,
+        "competition": 3,
+        "lifecycle": 1
+      },
+      "raw": {
+        "world": 1,
+        "marketSize": 68,
+        "growth": 19,
+        "margin": 16,
+        "current": 70,
+        "target": 90,
+        "years": 4,
+        "cost": 250
+      },
+      "notes": {
+        "summary": "CDMO 경쟁력 직결. 응용 범위가 넓음. 시연용 가상 수치입니다. 실제 시장조사·기술수준 평가 결과가 아닙니다."
+      },
+      "directReturn": null,
+      "directRisk": null,
+      "sample": false
+    },
+    {
+      "id": "demo-07",
+      "name": "CCUS용 저재생에너지 아민 흡수제",
+      "type": "company",
+      "mode": "criteria",
+      "scores": {
+        "excellence": 4,
+        "application": 3,
+        "ip": 3,
+        "impact": 5,
+        "infrastructure": 3,
+        "barrier": 2,
+        "competition": 2,
+        "lifecycle": 5
+      },
+      "raw": {
+        "world": 0,
+        "marketSize": 900,
+        "growth": 26,
+        "margin": 3,
+        "current": 68,
+        "target": 85,
+        "years": 5,
+        "cost": 180
+      },
+      "notes": {
+        "summary": "탄소중립 정책 의존도 높음. 수익성은 아직 낮음. 시연용 가상 수치입니다. 실제 시장조사·기술수준 평가 결과가 아닙니다."
+      },
+      "directReturn": null,
+      "directRisk": null,
+      "sample": false
+    },
+    {
+      "id": "demo-08",
+      "name": "디스플레이 편광필름 수율 개선 공정",
+      "type": "company",
+      "mode": "criteria",
+      "scores": {
+        "excellence": 2,
+        "application": 1,
+        "ip": 2,
+        "impact": 2,
+        "infrastructure": 1,
+        "barrier": 1,
+        "competition": 2,
+        "lifecycle": 2
+      },
+      "raw": {
+        "world": 0,
+        "marketSize": 600,
+        "growth": 4,
+        "margin": 4,
+        "current": 92,
+        "target": 96,
+        "years": 1,
+        "cost": 15
+      },
+      "notes": {
+        "summary": "기존 라인 개선형. 성과는 작지만 위험도 낮음. 시연용 가상 수치입니다. 실제 시장조사·기술수준 평가 결과가 아닙니다."
+      },
+      "directReturn": null,
+      "directRisk": null,
+      "sample": false
+    },
+    {
+      "id": "demo-09",
+      "name": "산업용 커넥터 하우징 금형 고도화",
+      "type": "company",
+      "mode": "criteria",
+      "scores": {
+        "excellence": 1,
+        "application": 1,
+        "ip": 1,
+        "impact": 1,
+        "infrastructure": 1,
+        "barrier": 1,
+        "competition": 3,
+        "lifecycle": 4
+      },
+      "raw": {
+        "world": 0,
+        "marketSize": 300,
+        "growth": 2,
+        "margin": 2,
+        "current": 95,
+        "target": 97,
+        "years": 1,
+        "cost": 10
+      },
+      "notes": {
+        "summary": "성숙·쇠퇴 시장. 차별성이 거의 없음. 시연용 가상 수치입니다. 실제 시장조사·기술수준 평가 결과가 아닙니다."
+      },
+      "directReturn": null,
+      "directRisk": null,
+      "sample": false
+    },
+    {
+      "id": "demo-10",
+      "name": "특수목적 반도체 테스트 소켓",
+      "type": "company",
+      "mode": "criteria",
+      "scores": {
+        "excellence": 4,
+        "application": 2,
+        "ip": 5,
+        "impact": 3,
+        "infrastructure": 1,
+        "barrier": 1,
+        "competition": 1,
+        "lifecycle": 2
+      },
+      "raw": {
+        "world": 1,
+        "marketSize": 30,
+        "growth": 22,
+        "margin": 18,
+        "current": 88,
+        "target": 93,
+        "years": 1.5,
+        "cost": 25
+      },
+      "notes": {
+        "summary": "틈새 독점 구조. 고수익·저경쟁. 시연용 가상 수치입니다. 실제 시장조사·기술수준 평가 결과가 아닙니다."
+      },
+      "directReturn": null,
+      "directRisk": null,
+      "sample": false
+    },
+    {
+      "id": "demo-11",
+      "name": "보급형 태양광 마이크로인버터",
+      "type": "company",
+      "mode": "criteria",
+      "scores": {
+        "excellence": 2,
+        "application": 2,
+        "ip": 2,
+        "impact": 3,
+        "infrastructure": 2,
+        "barrier": 3,
+        "competition": 5,
+        "lifecycle": 3
+      },
+      "raw": {
+        "world": 1,
+        "marketSize": 55,
+        "growth": 9,
+        "margin": 3,
+        "current": 86,
+        "target": 92,
+        "years": 2,
+        "cost": 45
+      },
+      "notes": {
+        "summary": "중국계 경쟁이 과열. 수익성 압박. 시연용 가상 수치입니다. 실제 시장조사·기술수준 평가 결과가 아닙니다."
+      },
+      "directReturn": null,
+      "directRisk": null,
+      "sample": false
+    },
+    {
+      "id": "demo-12",
+      "name": "상온 초전도 후보물질 탐색 및 검증",
+      "type": "research",
+      "mode": "criteria",
+      "scores": {
+        "excellence": 5,
+        "application": 5,
+        "ip": 3,
+        "impact": 5,
+        "infrastructure": 4,
+        "barrier": 3,
+        "competition": 2,
+        "lifecycle": 5
+      },
+      "raw": {
+        "world": 1,
+        "marketSize": 160,
+        "growth": 45,
+        "margin": 11,
+        "current": 45,
+        "target": 80,
+        "years": 5,
+        "cost": 400
+      },
+      "notes": {
+        "summary": "성공 시 파급효과가 매우 크나 기술격차가 극단적으로 큼. 시연용 가상 수치입니다. 실제 시장조사·기술수준 평가 결과가 아닙니다."
+      },
+      "directReturn": null,
+      "directRisk": null,
+      "sample": false
+    },
+    {
+      "id": "demo-13",
+      "name": "결함허용 양자컴퓨팅 오류정정 부호",
+      "type": "research",
+      "mode": "criteria",
+      "scores": {
+        "excellence": 5,
+        "application": 4,
+        "ip": 4,
+        "impact": 5,
+        "infrastructure": 4,
+        "barrier": 4,
+        "competition": 3,
+        "lifecycle": 5
+      },
+      "raw": {
+        "world": 1,
+        "marketSize": 110,
+        "growth": 41,
+        "margin": 10,
+        "current": 55,
+        "target": 85,
+        "years": 5,
+        "cost": 350
+      },
+      "notes": {
+        "summary": "원천기술 확보 목적. 국내 인프라가 미흡. 시연용 가상 수치입니다. 실제 시장조사·기술수준 평가 결과가 아닙니다."
+      },
+      "directReturn": null,
+      "directRisk": null,
+      "sample": false
+    },
+    {
+      "id": "demo-14",
+      "name": "침습형 뇌-기계 인터페이스 신호처리",
+      "type": "research",
+      "mode": "criteria",
+      "scores": {
+        "excellence": 4,
+        "application": 3,
+        "ip": 3,
+        "impact": 4,
+        "infrastructure": 4,
+        "barrier": 4,
+        "competition": 2,
+        "lifecycle": 5
+      },
+      "raw": {
+        "world": 1,
+        "marketSize": 25,
+        "growth": 33,
+        "margin": 8,
+        "current": 60,
+        "target": 82,
+        "years": 5,
+        "cost": 220
+      },
+      "notes": {
+        "summary": "시장 형성 초기. 규제 불확실성이 큼. 시연용 가상 수치입니다. 실제 시장조사·기술수준 평가 결과가 아닙니다."
+      },
+      "directReturn": null,
+      "directRisk": null,
+      "sample": false
+    }
+  ]
+}
