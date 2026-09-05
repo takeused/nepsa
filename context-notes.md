@@ -151,11 +151,31 @@ GitHub 검색 API로 `NEPSA`, `R&D portfolio management`, `project prioritizatio
 
 제3자 — `components/ui/` 60개 파일은 shadcn/ui에서 복사한 것이다. `node_modules`의 `shadcn`·`@shadcn/react` package.json에서 `license: MIT`와 LICENSE.md 존재를 실제로 확인했다(기억이 아니라 확인). 고지 의무는 없지만 파일 수가 저장소의 다수를 차지하므로 출처를 밝혔다.
 
+## 인쇄 / PDF 레이아웃
+
+`@media print` 블록으로 처리했다. 세 가지가 핵심이었다.
+
+**1. 종이 전용 팔레트를 따로 뒀다.** 화면 라이트 팔레트를 재사용하지 않는다. 종이는 순백 배경·검은 글자가 기준이고 등급색도 어두운 쪽이 잉크로 잘 나오기 때문이다. `:root,:root.dark` 양쪽에 선언해 **다크 테마로 보고 있어도 인쇄는 항상 흰 종이 기준**으로 나간다. JS로 인쇄 직전 dark 클래스를 떼는 방법도 있었지만, `beforeprint` 이벤트에 의존하지 않는 CSS 해법이 더 견고하다고 봤다.
+
+**2. `<details>` 안의 내용은 인쇄되지 않는다.** 지표별 평가 근거와 정성평가 분포 경고가 모두 details 안에 있었다. 닫힌 details의 내용은 CSS로 안정적으로 펼칠 수 없다(브라우저가 shadow DOM 슬롯으로 숨긴다). 그래서 인쇄 전용 문단(`.print-note`, `.distribution-print`)을 따로 렌더하고 화면에서는 숨긴다. **평가 근거가 빠진 보고서는 점수의 산출 이유를 알 수 없어 쓸모가 크게 떨어지므로** 이 처리는 필수였다.
+
+**3. 검증은 실제 인쇄 출력으로 했다.** CDP `Page.printToPDF`로 A4 PDF를 뽑아 pypdf로 페이지별 텍스트를 추출했다. 상단바·버튼·푸터 등 조작 요소 10종이 빠졌는지, 표제·매트릭스·표·근거가 들어갔는지를 문자열로 대조했다. 눈으로만 봤다면 근거 누락을 놓쳤을 것이다. 별도로 `Emulation.setEmulatedMedia({media:'print'})` + 스크린샷으로 색과 레이아웃도 확인했다.
+
+예제 데이터의 결함도 이 과정에서 드러났다. `notes.summary`에 근거를 넣어 뒀는데 **summary는 종합점수 직접 입력 모드에서만 화면에 표시된다.** 지표 평가 과제에 넣으면 앱 어디에서도 보이지 않는 죽은 데이터였다. 지표별 notes로 옮겼다.
+
+## lint 정리
+
+`npm run lint` 오류 0개.
+
+vendored 코드(`components/ui/**`, `hooks/use-mobile.ts`)는 shadcn/ui에서 복사한 것이라 상류의 스타일 선택이다. 우리가 고치면 재동기화 때 충돌하고, 규칙 제안 중에는 해당 컴포넌트에 부적절한 것도 있다(예: 툴바 그룹의 `role="group"`을 `fieldset`으로 바꾸라는 제안). **`ignorePatterns`로 통째로 제외하지 않고 `overrides`로 문제되는 규칙만 껐다.** 진짜 버그는 계속 잡히게 두기 위해서다.
+
+우리 코드(`app/page.tsx`) 7건 중 4건은 실제로 고쳤다 — label과 Select를 `htmlFor`/`id`로 연결(2건), CSV 셀 함수의 `unknown` 타입을 실제 넘기는 타입으로 좁힘, `role="status"`를 `<output>`으로 교체. 나머지 3건은 정당한 패턴이라 사유를 적은 `oxlint-disable-next-line`으로 처리했다. SVG 안에는 `<button>`을 중첩할 수 없고, localStorage는 SSR 렌더 중에 읽을 수 없어 마운트 후 동기화가 불가피하다.
+
 ## 검증 상태
 
 `npm test` 57개 통과 · `npx tsc --noEmit` 통과 · `npm run build` 통과 · 라이트/다크 양쪽 렌더 확인 · 브라우저에서 하이드레이션 오류 없음 · 12개 지표 폼·매트릭스·평가 기준 탭 렌더 확인.
 
-`npm run lint`는 실패하지만 **전부 기존 오류**다. 대부분 vendored `components/ui/*`(shadcn 원본)이고, `page.tsx` 쪽도 이번 변경과 무관한 a11y 규칙(`prefer-tag-over-role`, `label-has-associated-control`)이다. 손대지 않았다.
+`npm run lint` 오류 0개.
 
 ## 남은 것
 

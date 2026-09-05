@@ -88,7 +88,7 @@
 .save-status i.saved{background:var(--ok-dot)}
 .save-status i.unsaved{background:var(--warning-dot)}
 .notice.warning{background:var(--warning);border-color:var(--warning-border);color:var(--warning-foreground);display:block}
-.feedback{display:flex;align-items:center;justify-content:space-between;gap:14px;padding:12px 18px;margin-bottom:20px;border-radius:8px;background:var(--accent);border:1px solid var(--accent-border);color:var(--accent-foreground);font-size:14px}
+.feedback{display:flex;width:100%;align-items:center;justify-content:space-between;gap:14px;padding:12px 18px;margin-bottom:20px;border-radius:8px;background:var(--accent);border:1px solid var(--accent-border);color:var(--accent-foreground);font-size:14px}
 .feedback button{border:0;background:none;color:var(--accent-foreground);font-size:19px;line-height:1;padding:0 4px}
 
 /* ── 툴바 · 통계 ───────────────────────────────────────────── */
@@ -237,4 +237,91 @@ textarea{width:100%;min-height:78px;margin-top:9px;padding:10px 12px;border:1px 
  .chart-legend{padding:13px 16px}
  .navigation{flex-direction:column;align-items:flex-start;gap:6px}
  .save-status{padding-bottom:9px}
+}
+
+/* ── 인쇄 / PDF ────────────────────────────────────────────────
+   화면용 라이트 팔레트를 그대로 쓰지 않고 종이 전용 팔레트를 따로 둔다.
+   흰 배경·검은 글자를 기준으로 잉크를 아끼되 등급색은 유지한다. */
+.print-header,.print-note{display:none}
+@media print{
+ :root,:root.dark{
+  --background:#fff;--foreground:#000;
+  --panel:#fff;--panel-subtle:#fff;--popover:#fff;
+  --muted:#f2f4f5;--muted-foreground:#3f4a52;
+  --label:#2b343a;--soft:#4a565e;--eyebrow:#2b343a;
+  --border:#b9c2c7;--row-selected:#eef2f4;
+  --accent:#f2f5f4;--accent-foreground:#23342f;--accent-border:#c8d2ce;
+  --warning:#f7f4ef;--warning-border:#c9bda9;--warning-foreground:#4a3a1e;
+  --primary:#0f5349;--primary-foreground:#fff;
+  --danger:#8f3238;--icon-muted:#8d9aa2;
+  --grade-s:#0f5349;--grade-s-tint:#0f534918;
+  --grade-a:#2a5794;--grade-a-tint:#2a579418;
+  --grade-b:#7a5711;--grade-b-tint:#7a571118;
+  --grade-c:#654e77;--grade-c-tint:#654e7718;
+  --grade-d:#8f4147;--grade-d-tint:#8f414718;
+  --grade-none:#4a565e;--grade-none-tint:#4a565e18;
+  --dot-ink:#fff;--dot-selected:#0f2f2e;
+  --region-fill:.1;--region-fill-s:.2;
+ }
+ @page{margin:14mm}
+ body{font-size:10.5pt;background:#fff}
+ .workspace{max-width:none;padding:0}
+
+ /* 조작용 요소는 인쇄하지 않는다 */
+ .topbar,.navigation,.feedback,.toolbar,.selected-panel,.page-heading,
+ .evaluation .panel-title .actions,
+ .workspace footer,.fallback-score,
+ .panel table th:last-child,.panel table td:last-child{display:none!important}
+
+ /* 인쇄 전용 표제 */
+ .print-header{display:block;margin-bottom:14px;padding-bottom:10px;border-bottom:2px solid var(--foreground)}
+ .print-header strong{display:block;font-size:15pt;letter-spacing:-.3px}
+ .print-header span{display:block;margin-top:3px;font-size:10pt;color:var(--muted-foreground)}
+ .print-header small{display:block;margin-top:5px;font-size:8.5pt;color:var(--soft)}
+
+ /* 패널은 페이지 중간에서 잘리지 않게 */
+ .panel{break-inside:avoid;margin-bottom:12px;box-shadow:none}
+ .panel-title{padding:12px 14px}
+ .stats{gap:8px;margin-bottom:12px}
+ .stats>div{padding:10px 12px;break-inside:avoid}
+ .stats strong{font-size:15pt}
+
+ /* 매트릭스는 한 페이지에 온전히 */
+ .analysis-grid{display:block}
+ .matrix-panel{break-inside:avoid;margin-bottom:12px}
+ .chart-scroll{overflow:visible;padding:0 8px 4px}
+ .chart-scroll svg{min-width:0;width:100%}
+ .chart-legend{padding:8px 14px}
+
+ /* 표는 행 단위로 끊고 머리글을 페이지마다 반복 */
+ .panel table{font-size:9.5pt}
+ .panel table thead{display:table-header-group}
+ .panel table tr{break-inside:avoid}
+ .panel table th{height:32px}
+ .panel table td{height:34px}
+ .panel table tr[data-state=selected]{background:transparent}
+ .sample-label{color:var(--soft)}
+
+ /* 배경색이 있는 표시는 잉크로 남긴다 */
+ .grade,.rank-number,.source-tag,.criterion-heading span,.region-cell,.chart-dot,.chart-legend i{
+  -webkit-print-color-adjust:exact;print-color-adjust:exact}
+
+ /* 과제 평가는 새 페이지에서 시작 */
+ .evaluation{break-before:page}
+ .criteria-columns{gap:12px;padding:14px}
+ .criterion{break-inside:avoid;margin-bottom:8px;padding:10px 12px}
+ .criterion details,.distribution{display:none}
+ .distribution-print{margin:0 0 12px;padding:10px 14px;border:1px solid var(--warning-border);border-top:1px solid var(--warning-border);border-radius:8px;background:var(--warning);color:var(--warning-foreground);-webkit-print-color-adjust:exact;print-color-adjust:exact}
+ .distribution-print ul{margin:4px 0 0;padding-left:16px}
+ .distribution-print li{margin-bottom:2px}
+ /* 평가 근거는 details 안이라 인쇄되지 않는다. 인쇄 전용 문단으로 대체한다. */
+ .print-note{display:block;margin-top:9px;padding-top:8px;border-top:1px solid var(--border);font-size:9pt;line-height:1.5;color:var(--muted-foreground);break-inside:avoid}
+ .print-note span{display:block;font-size:8pt;font-weight:700;letter-spacing:.4px;color:var(--soft);margin-bottom:2px}
+ .evaluation-strip{padding:10px 14px}
+ .method-grid{display:block}
+ .method-panel{break-inside:avoid}
+
+ /* 링크는 주소를 함께 남긴다 */
+ .source a::after{content:' (' attr(href) ')';font-size:8pt;font-weight:400;color:var(--soft);word-break:break-all}
+ a{text-decoration:none}
 }
