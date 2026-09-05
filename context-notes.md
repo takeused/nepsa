@@ -39,9 +39,21 @@ vinext 1.0.0-beta.5 (Next.js 호환 레이어) + React 19.2 + Cloudflare Vite �
 - `app/globals.css`에 누락 클래스 53개 전부 작성 (163줄). 1180px / 680px 두 브레이크포인트 포함.
 - **하이드레이션 불일치 수정** — SVG `<title>`에 텍스트 자식을 여러 개 넣으면 React 19 SSR이 내용을 비운 `<title></title>`을 내보낸다(문서 metadata로 오인). 단일 템플릿 문자열로 바꿔 해결. 서버 HTML에 툴팁 텍스트가 실제로 들어가는 것까지 curl로 확인했다.
 
+## 테스트
+
+`npm test` (vitest). `lib/nepsa.test.ts` 48개.
+
+앱 출력이 아니라 **원문 표를 기준으로** 단언한다. 25쪽 예시 10개 과제의 기대성과·위험·등급·우선순위, 21~22쪽 정량지표 점수기준의 모든 구간 경계, 지표 가중치, 23~24쪽 12개 영역 배치가 대상이다.
+
+`vitest.config.ts`를 따로 둔 이유 — 앱의 `vite.config.ts`에는 Cloudflare/vinext 플러그인이 걸려 있어 테스트가 이를 끌어오면 느리고 불안정하다. `lib/nepsa.ts`는 import가 없는 순수 모듈이라 node 환경만으로 충분하다.
+
+**테스트 작성 중 걸린 함정** — 정량지표 4개(market·profit·gap·resources)는 `scores`에 직접 넣어도 반영되지 않는다. `scoresFor()`가 `{...p.scores, ...autoScores(p.raw)}` 순서라 `raw`가 비어 있으면 `autoScores`가 돌려주는 `null`이 수동 점수를 덮어쓴다. 그래서 테스트 헬퍼 `rawFor(n)`으로 원시 입력을 만들고, 이 헬퍼가 실제로 12개 지표를 n점으로 채우는지 확인하는 전제 테스트를 따로 뒀다.
+
+**뮤테이션 검증** — 테스트가 헛돌지 않는지 확인하려고 `nepsa.ts`에 결함 6종(가중치 변경, 구간 경계값 변경, 부등호 방향, 원천기술형 하한, 정렬 방향, 사사오입→버림)을 하나씩 심어 봤다. 전부 테스트가 잡았다. 원본은 되돌렸다.
+
 ## 검증 상태
 
-`npx tsc --noEmit` 통과 · `npm run build` 통과 · 브라우저에서 하이드레이션 오류 없음 · 12개 지표 폼·매트릭스·평가 기준 탭 렌더 확인.
+`npm test` 48개 통과 · `npx tsc --noEmit` 통과 · `npm run build` 통과 · 브라우저에서 하이드레이션 오류 없음 · 12개 지표 폼·매트릭스·평가 기준 탭 렌더 확인.
 
 `npm run lint`는 실패하지만 **전부 기존 오류**다. 대부분 vendored `components/ui/*`(shadcn 원본)이고, `page.tsx` 쪽도 이번 변경과 무관한 a11y 규칙(`prefer-tag-over-role`, `label-has-associated-control`)이다. 손대지 않았다.
 
