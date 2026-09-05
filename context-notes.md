@@ -57,9 +57,27 @@ vinext 1.0.0-beta.5 (Next.js 호환 레이어) + React 19.2 + Cloudflare Vite �
 
 UI의 Select는 1~5 정수만 만들어내므로 정상 사용 경로에서는 영향이 없다. 손으로 고친 백업 파일이나 손상된 localStorage만 거부된다. 거부됐을 때의 동작은 실제로 확인했다 — 경고를 띄우고 자동 저장을 멈추며, **기존 저장값을 덮어쓰지 않는다**. 사용자가 원본을 잃지 않고 복구할 수 있다.
 
+## 다크 모드
+
+`.dark` 토큰은 있었지만 아무도 그 클래스를 붙이지 않아 죽은 코드였고, 커스텀 클래스는 hex 58개를 하드코딩하고 있었다. 세 갈래로 정리했다.
+
+**1. 색 토큰화** — `globals.css` 상단 한 블록에 색을 모으고 나머지 규칙은 전부 `var()`만 쓴다. 표면(`--panel`, `--panel-subtle`), 텍스트(`--label`, `--soft`), 상태(`--danger`, `--warning-*`, `--ok-dot`), 상단바(`--topbar-*`) 등 역할 단위로 묶었다. 비슷한 회색 열몇 개는 `--muted-foreground` 하나로 합쳤다.
+
+**2. 등급색을 JS에서 CSS로** — `gradeColors`가 hex를 들고 있어 테마 전환이 닿지 않았다. 값을 `var(--grade-s)` 형태로 바꾸고 배경용 `gradeTints`를 분리했다(기존에는 hex에 `'15'`를 문자열로 붙여 알파를 만들고 있어서 `var()`와 함께 쓸 수 없었다). 주의할 점 하나 — **SVG는 `fill="var(--x)"` 같은 presentation attribute로는 변수가 해석되지 않는다.** `style={{fill:...}}`로 넘겨야 한다. 매트릭스 사각형·점·라벨을 전부 이 방식으로 바꿨다.
+
+**3. 토글** — 테마의 단일 출처는 `<html>`의 `dark` 클래스다. React 상태로 복제하지 않는다.
+- 최초값은 `layout.tsx`의 인라인 스크립트가 첫 페인트 전에 정한다. 저장된 선택이 없으면 OS 설정(`prefers-color-scheme`)을 따른다. `<html suppressHydrationWarning>`이 필요하다.
+- 아이콘 전환도 CSS(`.on-light` / `.on-dark`)가 맡는다. 처음에는 `useState`+`useEffect`로 DOM 클래스를 읽어 상태에 복제했는데, oxlint의 `EffectSetState`에 걸렸고 마운트 시 불필요한 재렌더도 생겼다. 상태를 없애니 린트 오류·재렌더·하이드레이션 불일치가 한꺼번에 사라졌다.
+
+다크에서는 등급색을 밝은 쪽으로 다시 잡고(`#146c60` → `#3fbfa8`), 점 안 숫자 색을 `--dot-ink`로 뒤집었으며, 영역 채움 불투명도도 `--region-fill`로 올렸다(.075 → .16). 라이트 팔레트를 그대로 어두운 배경에 얹으면 대비가 무너지기 때문이다.
+
+## 참조 조사 (2026-09-05)
+
+GitHub 검색 API로 `NEPSA`, `R&D portfolio management`, `project prioritization matrix`, `KEIT`, `국가R&D` 등을 조회했다. 이 방법론을 구현한 저장소는 없다. `NEPSA` 상위 결과는 전부 동명이의(Brazilian 알고리즘 학습 사이트, 광고 SDK, 이커머스 등 최대 2스타)이고, `KEIT`는 Keithley·携帯(keitai) 같은 부분일치였다. 참조해서 보완할 만한 선행 구현이 없어 아무것도 반영하지 않았다. 앱의 "평가 기준·출처" 탭에도 이 조사 결과를 반영해 뒀다.
+
 ## 검증 상태
 
-`npm test` 48개 통과 · `npx tsc --noEmit` 통과 · `npm run build` 통과 · 브라우저에서 하이드레이션 오류 없음 · 12개 지표 폼·매트릭스·평가 기준 탭 렌더 확인.
+`npm test` 48개 통과 · `npx tsc --noEmit` 통과 · `npm run build` 통과 · 라이트/다크 양쪽 렌더 확인 · 브라우저에서 하이드레이션 오류 없음 · 12개 지표 폼·매트릭스·평가 기준 탭 렌더 확인.
 
 `npm run lint`는 실패하지만 **전부 기존 오류**다. 대부분 vendored `components/ui/*`(shadcn 원본)이고, `page.tsx` 쪽도 이번 변경과 무관한 a11y 규칙(`prefer-tag-over-role`, `label-has-associated-control`)이다. 손대지 않았다.
 

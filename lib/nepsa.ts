@@ -23,7 +23,12 @@ export const regions = [
  {name:'B4',x:0,y:0,w:25,h:25},{name:'C3',x:25,y:0,w:25,h:25},{name:'D2',x:50,y:0,w:50,h:25},
 ];
 export const regionOrder=['S','A1','A2','B1','B2','B3','B4','C1','C2','C3','D1','D2'];
-export const gradeColors:Record<string,string>={S:'#146c60',A:'#356fbe',B:'#9c7016',C:'#826497',D:'#b45259'};
+// 색상값은 app/globals.css의 토큰을 참조한다. 라이트/다크 전환을 CSS가 처리하도록
+// 하드코딩 hex 대신 var()를 쓴다. SVG에서는 presentation attribute가 아니라
+// style 속성으로 넘겨야 var()가 해석된다.
+export const gradeColors:Record<string,string>={S:'var(--grade-s)',A:'var(--grade-a)',B:'var(--grade-b)',C:'var(--grade-c)',D:'var(--grade-d)'};
+export const gradeTints:Record<string,string>={S:'var(--grade-s-tint)',A:'var(--grade-a-tint)',B:'var(--grade-b-tint)',C:'var(--grade-c-tint)',D:'var(--grade-d-tint)'};
+export const gradeNone='var(--grade-none)',gradeNoneTint='var(--grade-none-tint)';
 export function isNumber(n:unknown):n is number{return typeof n==='number'&&Number.isFinite(n);}
 export function band(n:number,cuts:number[]){return cuts.filter(c=>n>=c).length+1;}
 export function autoScores(raw:Project['raw']):Record<string,number|null>{
