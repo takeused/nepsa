@@ -83,7 +83,7 @@ export function validateImport(data:unknown):{projects:Project[],settings:Settin
   if(typeof p.id!=='string'||!p.id||ids.has(p.id)||typeof p.name!=='string'||!p.name.trim()||p.name.length>300||!['company','research'].includes(p.type)||!['direct','criteria'].includes(p.mode))throw new Error('과제 이름·유형·고유번호를 확인하세요.');
   ids.add(p.id);
   for(const map of [p.scores,p.raw,p.notes])if(!map||typeof map!=='object'||Array.isArray(map))throw new Error('평가값 형식 오류');
-  for(const [k,n]of Object.entries(p.scores))if(!criteria.some(c=>c.id===k)||n!==null&&(!isNumber(n)||n<1||n>5))throw new Error('지표 점수는 1~5점이어야 합니다.');
+  for(const [k,n]of Object.entries(p.scores))if(!criteria.some(c=>c.id===k)||n!==null&&(!Number.isInteger(n)||n<1||n>5))throw new Error('지표 점수는 1~5 사이의 정수여야 합니다.');
   for(const n of Object.values(p.raw))if(n!==null&&!isNumber(n))throw new Error('정량 입력값은 숫자여야 합니다.');
   for(const n of [p.directReturn,p.directRisk])if(n!==null&&(!isNumber(n)||n<0||n>100))throw new Error('종합점수는 0~100점이어야 합니다.');
   for(const n of Object.values(p.notes))if(typeof n!=='string'||n.length>20000)throw new Error('평가 근거 형식 오류');

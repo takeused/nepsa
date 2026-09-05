@@ -426,16 +426,17 @@ describe('JSON 백업 검증', () => {
     expect(() => validateImport(backup({ projects: [p, { ...p }] }))).toThrow();
   });
 
-  it('지표 점수는 1~5점만 받는다', () => {
-    // 참고: 현재 검증은 정수 여부를 보지 않아 2.5 같은 값은 통과한다.
-    // UI가 1~5 정수만 입력받으므로 실사용에는 드러나지 않지만, 손으로 고친
-    // 백업 파일은 소수 점수로 들어올 수 있다. checklist.md에 결정 사항으로 남겼다.
-    for (const n of [0, 6, -1, Number.NaN]) {
+  it('지표 점수는 1~5 사이의 정수만 받는다', () => {
+    // 원문 기준표가 1~5점 정수라 소수·범위 밖·비정상 값은 모두 거부한다.
+    for (const n of [0, 6, -1, 2.5, 4.999, Number.NaN, Number.POSITIVE_INFINITY]) {
       const p = project({ id: 'a', name: '과제', scores: { excellence: n } });
       expect(() => validateImport(backup({ projects: [p] })), String(n)).toThrow();
     }
-    const ok = project({ id: 'a', name: '과제', scores: { excellence: 3 } });
-    expect(() => validateImport(backup({ projects: [ok] }))).not.toThrow();
+    // 1~5 정수와 미입력(null)은 통과해야 한다.
+    for (const n of [1, 2, 3, 4, 5, null]) {
+      const ok = project({ id: 'a', name: '과제', scores: { excellence: n } });
+      expect(() => validateImport(backup({ projects: [ok] })), String(n)).not.toThrow();
+    }
   });
 
   it('알 수 없는 지표 이름은 거부한다', () => {
