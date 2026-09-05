@@ -1,8 +1,8 @@
 export type ProjectType = 'company' | 'research';
-// 평가 산식·정렬은 모두 원문 근거로 확정되어 사용자 설정이 없다.
+// 정렬은 원문 기준이며, 100점 환산은 공개 산식이 없어 선택한 구현 가정이다.
 // 100점 환산은 (가중평균 − 1) ÷ 4 × 100 하나로 고정한다. 원문에 산식이 없어
 // 한때 ÷5×100도 선택지로 뒀으나, ÷5는 지표 최저가 1점이라 산출 범위가
-// 20~100으로 눌려 매트릭스의 S 영역(위험<25)과 최하단 행에 도달할 수 없다.
+// 20~100으로 제한된다. S 영역과 최하단 행도 20~25 구간에서는 도달 가능하다.
 // 자세한 근거는 README와 context-notes.md 참고.
 export const normalizationLabel = '(가중평균 − 1) ÷ 4 × 100';
 // 우선순위는 원문 3-2)·3-3)이 두 과제유형 모두에 대해 명시한 12개 영역 순서를
@@ -41,31 +41,47 @@ export const gradeTints:Record<string,string>={S:'var(--grade-s-tint)',A:'var(--
 export const gradeNone='var(--grade-none)',gradeNoneTint='var(--grade-none-tint)';
 export function isNumber(n:unknown):n is number{return typeof n==='number'&&Number.isFinite(n);}
 export function band(n:number,cuts:number[]){return cuts.filter(c=>n>=c).length+1;}
+export function technologyGapScore(current:number,target:number){
+ const cuts=current>=90?[2,4,6,8]:current>=80?[5,8,12,15]:current>=70?[10,15,20,25]:[15,20,25,30];
+ // 입력 숫자의 십진 표현으로 차를 비교한다. 단순 뺄셈뿐 아니라
+ // 2.24+15 같은 덧셈도 경계값을 넘는 이진 부동소수점 오차를 낼 수 있다.
+ const decimal=(n:number)=>{const [mantissa,exponent='0']=n.toString().split('e');const [whole,fraction='']=mantissa.split('.');return {digits:BigInt(whole+fraction),exponent:Number(exponent)-fraction.length};};
+ const a=decimal(current),b=decimal(target),scale=Math.min(a.exponent,b.exponent,0);
+ const difference=b.digits*BigInt(10)**BigInt(b.exponent-scale)-a.digits*BigInt(10)**BigInt(a.exponent-scale);
+ return cuts.filter(c=>difference>=BigInt(c)*BigInt(10)**BigInt(-scale)).length+1;
+}
 export const ipCuts=[0,20,60,80];
 export const ipParts=[{id:'ipFilings',label:'출원증가율'},{id:'ipDomestic',label:'국내출원인 출원건수 증가율'},{id:'ipShare',label:'최근구간 점유율'},{id:'ipMarket',label:'특허 시장확보력'}] as const;
+export function hasIpInputs(raw:Project['raw']){return ipParts.some(p=>raw[p.id]!==undefined&&raw[p.id]!==null);}
+const rawLimits:Record<string,{min?:number;max?:number}>={world:{min:0,max:1},marketSize:{min:0},growth:{min:-100},margin:{},current:{min:0,max:100},target:{min:0,max:100},years:{min:0},cost:{min:0},ipFilings:{min:-100},ipDomestic:{min:-100},ipShare:{min:0,max:100},ipMarket:{min:-100}};
+export function rawValueValid(key:string,value:unknown){
+ if(!Object.hasOwn(rawLimits,key)||!isNumber(value))return false;
+ const {min,max}=rawLimits[key];
+ return (min===undefined||value>=min)&&(max===undefined||value<=max)&&(key!=='world'||Number.isInteger(value));
+}
 export function autoScores(raw:Project['raw']):Record<string,number|null>{
- const valid=(...keys:string[])=>keys.every(k=>isNumber(raw[k]));
+ const valid=(...keys:string[])=>keys.every(k=>rawValueValid(k,raw[k]));
  return {
- market:valid('marketSize','growth')&&raw.marketSize!>=0?Math.max(band(raw.marketSize!,raw.world===1?[20,50,100,150]:[1000,2000,3500,5000]),band(raw.growth!,[3,8,13,20])):null,
+ market:valid('marketSize','growth')&&(raw.world===undefined||rawValueValid('world',raw.world))?Math.max(band(raw.marketSize!,raw.world===1?[20,50,100,150]:[1000,2000,3500,5000]),band(raw.growth!,[3,8,13,20])):null,
  profit:valid('margin')?band(raw.margin!,[2,4,8,12]):null,
  // IP 부상도 — 네 항목 모두 같은 구간표(0% 미만 / 0~20 / 20~60 / 60~80 / 80 이상)를
  // 쓰고 평균을 사사오입한다. 2013년 원문에 기준표가 없어 CODIL 연구보고서
  // OTKCRK230019 표 3-10 "NEPSA 중 특허평가지표"를 근거로 삼았다.
  ip:valid('ipFilings','ipDomestic','ipShare','ipMarket')?Math.round(([raw.ipFilings!,raw.ipDomestic!,raw.ipShare!,raw.ipMarket!].reduce((t,n)=>t+band(n,ipCuts),0))/4):null,
- gap:valid('current','target')&&raw.current!>=0&&raw.current!<=100&&raw.target!>=raw.current!&&raw.target!<=100?band(raw.target!-raw.current!,raw.current!>=90?[2,4,6,8]:raw.current!>=80?[5,8,12,15]:raw.current!>=70?[10,15,20,25]:[15,20,25,30]):null,
+ gap:valid('current','target')&&raw.target!>=raw.current!?technologyGapScore(raw.current!,raw.target!):null,
  resources:valid('years','cost')&&raw.years!>=0&&raw.cost!>=0?Math.round((band(raw.years!,[1.5,2,2.5,3])+band(raw.cost!,[20,50,100,200]))/2):null,
  };
 }
 export function scoresFor(p:Project):Record<string,number|null>{
  const auto=autoScores(p.raw);
- // ip는 특허분석 4개 값이 모두 있을 때만 자동 채점하고, 없으면 직접 입력한
- // 점수를 유지한다. 기준표 도입 이전 백업이 그대로 열리도록 하기 위함이다.
- return {...p.scores,...auto,ip:auto.ip??p.scores.ip??null};
+ // 자동 입력을 시작했다면 불완전·오류 입력을 기존 수동 점수로 숨기지 않는다.
+ // 네 수치를 모두 비운 경우에만 구버전 수동 점수를 사용한다.
+ return {...p.scores,...auto,ip:hasIpInputs(p.raw)?auto.ip:p.scores.ip??null};
 }
 export function axisScore(p:Project,axis:'return'|'risk'):number|null{
  if(p.mode==='direct'){const n=axis==='return'?p.directReturn:p.directRisk;return isNumber(n)&&n>=0&&n<=100?n:null;}
  const scores=scoresFor(p),cs=criteria.filter(c=>c.axis===axis);
- if(cs.some(c=>!isNumber(scores[c.id])||scores[c.id]!<1||scores[c.id]!>5))return null;
+ if(cs.some(c=>!Number.isInteger(scores[c.id])||scores[c.id]!<1||scores[c.id]!>5))return null;
  return cs.reduce((sum,c)=>sum+((scores[c.id]!-1)/4)*c.weight,0);
 }
 export function classify(ret:number|null,risk:number|null,type:ProjectType){
@@ -89,7 +105,7 @@ export function rank(projects:Project[]){
 export function distributionWarnings(projects:Project[]){
  const assessed=projects.filter(p=>p.mode==='criteria');
  return criteria.filter(c=>c.qualitative).flatMap(c=>{
-  const complete=assessed.filter(p=>isNumber(p.scores[c.id]));
+  const complete=assessed.filter(p=>Number.isInteger(p.scores[c.id])&&p.scores[c.id]!>=1&&p.scores[c.id]!<=5);
   const good=complete.filter(p=>c.axis==='return'?p.scores[c.id]!>=3:p.scores[c.id]!<3).length;
   return complete.length&&good/complete.length>0.6?[`${c.name}: ${good}/${complete.length}개 (${Math.round(good/complete.length*100)}%) — 60% 초과${complete.length<assessed.length?' · 미입력 제외 잠정치':''}`]:[];
  });
@@ -110,7 +126,8 @@ export function validateImport(data:unknown):{projects:Project[]}{
   ids.add(p.id);
   for(const map of [p.scores,p.raw,p.notes])if(!map||typeof map!=='object'||Array.isArray(map))throw new Error('평가값 형식 오류');
   for(const [k,n]of Object.entries(p.scores))if(!criteria.some(c=>c.id===k)||n!==null&&(!Number.isInteger(n)||n<1||n>5))throw new Error('지표 점수는 1~5 사이의 정수여야 합니다.');
-  for(const n of Object.values(p.raw))if(n!==null&&!isNumber(n))throw new Error('정량 입력값은 숫자여야 합니다.');
+  for(const [k,n] of Object.entries(p.raw))if(!Object.hasOwn(rawLimits,k)||n!==null&&!rawValueValid(k,n))throw new Error(`${p.name}: 정량 입력 ${k}의 범위를 확인하세요.`);
+  if(isNumber(p.raw.current)&&isNumber(p.raw.target)&&p.raw.target<p.raw.current)throw new Error(`${p.name}: 목표 기술수준은 현재 수준 이상이어야 합니다.`);
   for(const n of [p.directReturn,p.directRisk])if(n!==null&&(!isNumber(n)||n<0||n>100))throw new Error('종합점수는 0~100점이어야 합니다.');
   for(const n of Object.values(p.notes))if(typeof n!=='string'||n.length>20000)throw new Error('평가 근거 형식 오류');
   return {id:p.id,name:p.name,type:p.type,mode:p.mode,scores:{...p.scores},raw:{...p.raw},notes:{...p.notes},directReturn:p.directReturn,directRisk:p.directRisk,sample:Boolean(p.sample)};

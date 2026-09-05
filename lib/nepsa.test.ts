@@ -147,7 +147,10 @@ describe('정량지표 자동 채점 (원문 21~22쪽)', () => {
   it('IP 부상도 — 네 항목 공통 구간 0/20/60/80 (CODIL 표 3-10)', () => {
     const at = (n: number) =>
       score({ ipFilings: n, ipDomestic: n, ipShare: n, ipMarket: n }, 'ip');
-    expect([at(-0.1), at(0), at(19.9), at(20)]).toEqual([1, 2, 2, 3]);
+    // 증가율은 음수일 수 있지만 최근구간 점유율은 0~100%여야 한다.
+    expect(at(-0.1)).toBeNull();
+    expect([at(0), at(19.9), at(20)]).toEqual([2, 2, 3]);
+    expect(score({ipFilings:-1,ipDomestic:-1,ipShare:0,ipMarket:-1},'ip')).toBe(1);
     expect([at(59.9), at(60), at(79.9), at(80)]).toEqual([3, 4, 4, 5]);
   });
 

@@ -242,7 +242,11 @@ textarea{width:100%;min-height:78px;margin-top:9px;padding:10px 12px;border:1px 
 /* ── 인쇄 / PDF ────────────────────────────────────────────────
    화면용 라이트 팔레트를 그대로 쓰지 않고 종이 전용 팔레트를 따로 둔다.
    흰 배경·검은 글자를 기준으로 잉크를 아끼되 등급색은 유지한다. */
-.print-header,.print-note{display:none}
+.contribution{margin-top:10px;font-size:14px;color:var(--muted-foreground)}
+.contribution strong{color:var(--foreground);font-variant-numeric:tabular-nums}
+.ip-mode-note{margin-top:10px;font-size:14px;color:var(--muted-foreground)}
+.number-field input[aria-invalid=true]{border-color:var(--danger)}
+.print-header,.print-note,.print-name{display:none}
 @media print{
  :root,:root.dark{
   --background:#fff;--foreground:#000;
@@ -308,6 +312,10 @@ textarea{width:100%;min-height:78px;margin-top:9px;padding:10px 12px;border:1px 
 
  /* 과제 평가는 새 페이지에서 시작 */
  .evaluation{break-before:page}
+ .evaluation{break-inside:auto}
+ .print-name{display:block;white-space:pre-wrap;overflow-wrap:anywhere;font-weight:700}
+ .name-field>input,.direct-form .evidence-label,.ip-mode-note button{display:none}
+ .print-note{white-space:pre-wrap;overflow-wrap:anywhere}
  .criteria-columns{gap:12px;padding:14px}
  .criterion{break-inside:avoid;margin-bottom:8px;padding:10px 12px}
  .criterion details,.distribution{display:none}
@@ -325,3 +333,24 @@ textarea{width:100%;min-height:78px;margin-top:9px;padding:10px 12px;border:1px 
  .source a::after{content:' (' attr(href) ')';font-size:8pt;font-weight:400;color:var(--soft);word-break:break-all}
  a{text-decoration:none}
 }
+.insight{padding:24px;margin-bottom:24px}
+.insight h2{font-size:20px;font-weight:700;margin-bottom:12px}
+.insight h3{font-size:16px;font-weight:650;margin:20px 0 12px}
+.insight p{line-height:1.65;margin-bottom:14px}
+.insight-columns{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:24px;margin:20px 0}
+.contribution-row{display:grid;grid-template-columns:minmax(140px,1fr) 90px 70px;gap:8px;align-items:center;padding:8px 0;font-size:14px}
+.contribution-row small{color:var(--muted-foreground)}
+.contribution-row meter{width:100%;accent-color:var(--primary)}
+.analysis-actions{display:flex;flex-wrap:wrap;align-items:end;gap:12px;margin:20px 0}
+.advanced-analysis label,.evidence-fields label{display:grid;gap:6px;font-size:14px}
+.advanced-analysis input:not([type=checkbox]),.advanced-analysis select,.evidence-fields input,.evidence-fields select{border:1px solid var(--border);background:var(--background);color:var(--foreground);border-radius:6px;padding:8px;max-width:100%;min-height:40px}
+.comparison-scroll{overflow-x:auto;margin:20px 0}
+.comparison-scroll table{border-collapse:collapse;width:100%;font-size:14px}
+.comparison-scroll caption{text-align:left;padding:10px 0;font-weight:600}
+.comparison-scroll th,.comparison-scroll td{border:1px solid var(--border);padding:12px;text-align:left;vertical-align:top;min-width:110px;overflow-wrap:anywhere}
+.comparison-scroll th{background:var(--muted)}
+.project-checks{display:flex;flex-wrap:wrap;gap:12px;max-height:240px;overflow:auto}
+.project-checks label{display:flex;align-items:center;gap:8px;border:1px solid var(--border);padding:8px;border-radius:6px}
+.evidence-fields{display:grid;gap:12px;margin-top:12px}
+@media(max-width:850px){.insight-columns{grid-template-columns:1fr}.insight{padding:16px}.navigation{flex-wrap:wrap}.contribution-row{grid-template-columns:minmax(120px,1fr) 60px 65px}}
+@media print{.advanced-analysis .analysis-actions,.advanced-analysis button,.project-checks{display:none!important}.comparison-scroll{overflow:visible}.comparison-scroll table th:last-child,.comparison-scroll table td:last-child{display:table-cell!important}.insight{break-inside:auto}.contribution-row meter{display:none}.contribution-row{grid-template-columns:1fr auto}}
