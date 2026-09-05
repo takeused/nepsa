@@ -1,11 +1,16 @@
 export type ProjectType = 'company' | 'research';
-export type Settings = { sorting: 'grade' | 'region' };
-export const defaultSettings: Settings = { sorting: 'grade' };
+// 평가 산식·정렬은 모두 원문 근거로 확정되어 사용자 설정이 없다.
 // 100점 환산은 (가중평균 − 1) ÷ 4 × 100 하나로 고정한다. 원문에 산식이 없어
 // 한때 ÷5×100도 선택지로 뒀으나, ÷5는 지표 최저가 1점이라 산출 범위가
 // 20~100으로 눌려 매트릭스의 S 영역(위험<25)과 최하단 행에 도달할 수 없다.
 // 자세한 근거는 README와 context-notes.md 참고.
 export const normalizationLabel = '(가중평균 − 1) ÷ 4 × 100';
+// 우선순위는 원문 3-2)·3-3)이 두 과제유형 모두에 대해 명시한 12개 영역 순서를
+// 따른다: S›A(A1›A2)›B(B1›B2›B3›B4)›C(C1›C2›C3)›D(D1›D2).
+// 이 순서는 기준 3의 대등급 순서(S›A›B›C›D)를 그대로 보존하면서 영역 단위로
+// 더 세분한 것이므로 두 조항이 충돌하지 않는다. 동일 영역 내에서는 기준 3에
+// 따라 기대성과가 높은 과제를 앞세운다.
+export const sortingLabel = '12개 영역 순서 (S›A1›A2›B1…D2), 동일 영역은 기대성과 순';
 export type Project = { id: string; name: string; type: ProjectType; mode: 'direct' | 'criteria'; scores: Record<string, number | null>; raw: Record<string, number | null>; notes: Record<string, string>; directReturn: number | null; directRisk: number | null; sample?: boolean };
 export const criteria = [
  { id:'excellence',name:'기술적 수월성',axis:'return',weight:15,qualitative:true,description:'기술의 독창성 및 차별성',labels:['아주 낮음','낮음','보통','높음','매우 높음'] },
@@ -73,11 +78,11 @@ export function classify(ret:number|null,risk:number|null,type:ProjectType){
  return {grade:region[0],region,eligible:true};
 }
 export function evaluate(p:Project){const ret=axisScore(p,'return'),risk=axisScore(p,'risk');return {...p,ret,risk,...classify(ret,risk,p.type)};}
-export function rank(projects:Project[],settings:Settings){
+export function rank(projects:Project[]){
  return projects.map(p=>evaluate(p)).sort((a,b)=>{
   if(a.eligible!==b.eligible)return a.eligible?-1:1;
   if(!a.eligible)return a.name.localeCompare(b.name,'ko');
-  const ord=(r:typeof a)=>settings.sorting==='region'?regionOrder.indexOf(r.region):['S','A','B','C','D'].indexOf(r.grade);
+  const ord=(r:typeof a)=>regionOrder.indexOf(r.region);
   return ord(a)-ord(b)||(b.ret!-a.ret!)||a.name.localeCompare(b.name,'ko')||a.id.localeCompare(b.id);
  }).map((p,i)=>({...p,rank:p.eligible?i+1:null}));
 }
@@ -91,13 +96,12 @@ export function distributionWarnings(projects:Project[]){
 }
 export function newProject(id:string,type:ProjectType):Project{return {id,name:'새 R&D 과제',type,mode:'criteria',scores:{},raw:{world:0},notes:{},directReturn:null,directRisk:null};}
 export const sampleProjects:Project[]=[['AAA',70.83,42.5],['BBB',72.5,26.67],['CCC',85,22],['DDD',60,51],['EEE',77,49],['FFF',74,36],['GGG',56,64],['HHH',62,69],['III',44,64],['JJJ',67,61]].map(([n,r,k])=>({id:`sample-${n}`,name:`${n} 기술개발`,type:'company',mode:'direct',scores:{},raw:{},notes:{summary:'2013 KEIT 보고서 PDF 25쪽 표의 점수. 지표별 원점수는 제공되지 않습니다.'},directReturn:r as number,directRisk:k as number,sample:true}));
-export function validateImport(data:unknown):{projects:Project[],settings:Settings}{
+export function validateImport(data:unknown):{projects:Project[]}{
  if(!data||typeof data!=='object')throw new Error('올바른 JSON 백업이 아닙니다.');
  const d=data as Record<string,unknown>;
  if(d.version!==1||!Array.isArray(d.projects)||d.projects.length>1000)throw new Error('버전 1의 NEPSA 백업(최대 1,000개)만 지원합니다.');
- const s=d.settings as Settings;
- // 구버전 백업의 normalization 필드는 무시하고 받아들인다(환산식은 이제 고정).
- if(!s||!['grade','region'].includes(s.sorting))throw new Error('평가 설정이 유효하지 않습니다.');
+ // 구버전 백업의 settings(normalization·sorting)는 무시하고 받아들인다.
+ // 산식과 정렬이 모두 원문 근거로 고정되어 더 이상 선택 항목이 아니다.
  const ids=new Set<string>();
  const projects=d.projects.map((v:unknown)=>{
   if(!v||typeof v!=='object')throw new Error('과제 형식 오류');
@@ -111,5 +115,5 @@ export function validateImport(data:unknown):{projects:Project[],settings:Settin
   for(const n of Object.values(p.notes))if(typeof n!=='string'||n.length>20000)throw new Error('평가 근거 형식 오류');
   return {id:p.id,name:p.name,type:p.type,mode:p.mode,scores:{...p.scores},raw:{...p.raw},notes:{...p.notes},directReturn:p.directReturn,directRisk:p.directRisk,sample:Boolean(p.sample)};
  });
- return {projects,settings:{sorting:s.sorting}};
+ return {projects};
 }

@@ -5,7 +5,6 @@ import {
   axisScore,
   classify,
   criteria,
-  defaultSettings,
   distributionWarnings,
   evaluate,
   newProject,
@@ -17,7 +16,6 @@ import {
 } from './nepsa';
 import type { Project } from './nepsa';
 
-const settings = defaultSettings;
 const project = (over: Partial<Project> = {}): Project => ({
   ...newProject('t', 'company'),
   ...over,
@@ -75,18 +73,18 @@ describe('원문 25쪽 등급부여 예시', () => {
   });
 
   it('10개 과제의 등급과 우선순위가 원문과 일치한다', () => {
-    const rows = rank(sampleProjects, settings);
+    const rows = rank(sampleProjects);
     for (const [name, , , grade, priority] of expected) {
       const row = rows.find((r) => r.id === `sample-${name}`)!;
       expect([row.grade, row.rank], name).toEqual([grade, priority]);
     }
   });
 
-  it('정렬 방식을 세부 영역 기준으로 바꿔도 같은 순위가 나온다', () => {
-    // 예시 10개는 B등급이 모두 B2라 두 정렬 기준의 결과가 같아야 한다.
-    const byGrade = rank(sampleProjects, { ...settings, sorting: 'grade' });
-    const byRegion = rank(sampleProjects, { ...settings, sorting: 'region' });
-    expect(byRegion.map((p) => p.id)).toEqual(byGrade.map((p) => p.id));
+  it('예시의 B등급은 모두 B2라 대등급 정렬과 영역 정렬이 구분되지 않는다', () => {
+    // 원문 예시로는 두 해석을 판별할 수 없다는 사실 자체를 기록해 둔다.
+    const bs = rank(sampleProjects).filter((p) => p.grade === 'B');
+    expect(bs.length).toBeGreaterThan(1);
+    expect(new Set(bs.map((p) => p.region))).toEqual(new Set(['B2']));
   });
 });
 
@@ -364,31 +362,50 @@ describe('우선순위 정렬', () => {
     project({ id: name, name, mode: 'direct', directReturn: ret, directRisk: risk });
 
   it('대등급 → 기대성과 순으로 정렬한다', () => {
-    const rows = rank([make('저', 30, 30), make('고', 90, 10), make('중', 65, 20)], settings);
+    const rows = rank([make('저', 30, 30), make('고', 90, 10), make('중', 65, 20)]);
     expect(rows.map((r) => r.name)).toEqual(['고', '중', '저']);
     expect(rows.map((r) => r.rank)).toEqual([1, 2, 3]);
   });
 
-  it('세부 영역 정렬은 regionOrder를 따른다', () => {
-    // A2(기대 62.5·위험 12.5) 와 B1(기대 87.5·위험 62.5)
+  it('영역 순서는 대등급 순서를 보존한다 (원문 기준 3과 3-2가 충돌하지 않음)', () => {
+    expect(regionOrder.map((r) => r[0]).join('')).toBe('SAABBBBCCCDD');
+  });
+
+  it('같은 등급 안에서 영역 순서는 기대성과 내림차순과 항상 일치한다', () => {
+    // 원문 기준 3은 "동일 등급은 기대성과 높은 과제 우선", 3-2)는 영역 순서를
+    // 규정한다. 두 규칙이 다른 결과를 낼 수 있는 입력은 존재하지 않는다.
+    // 각 영역이 가질 수 있는 기대성과 구간이 서로 겹치지 않기 때문이다.
+    const span: Record<string, number[]> = {};
+    for (let ret = 0; ret <= 100; ret += 0.5) {
+      for (let risk = 0; risk <= 100; risk += 0.5) {
+        (span[classify(ret, risk, 'company').region] ??= []).push(ret);
+      }
+    }
+    for (let i = 0; i < regionOrder.length; i++) {
+      for (let j = i + 1; j < regionOrder.length; j++) {
+        const [a, b] = [regionOrder[i], regionOrder[j]];
+        if (a[0] !== b[0]) continue; // 같은 대등급끼리만 비교
+        expect(Math.min(...span[a]), `${a} vs ${b}`).toBeGreaterThan(Math.max(...span[b]));
+      }
+    }
+  });
+
+  it('영역 순서를 따른다 — 기대성과가 낮아도 앞선 영역이 우선', () => {
+    // A2(기대 62.5·위험 12.5)는 B1(기대 87.5·위험 62.5)보다 기대성과가 낮지만
+    // 영역 순서가 앞서므로 먼저 온다. 지배원리(위험 낮고 성과 높은 쪽 우선)의 결과다.
     const a2 = make('A2과제', 62.5, 12.5);
     const b1 = make('B1과제', 87.5, 62.5);
-    // 대등급 기준이면 B1(B) 보다 A2(A) 가 앞선다
-    expect(rank([b1, a2], { ...settings, sorting: 'grade' }).map((r) => r.name))
-      .toEqual(['A2과제', 'B1과제']);
-    // 세부 영역 기준이어도 A2가 B1보다 앞선다
     expect(regionOrder.indexOf('A2')).toBeLessThan(regionOrder.indexOf('B1'));
-    expect(rank([b1, a2], { ...settings, sorting: 'region' }).map((r) => r.name))
-      .toEqual(['A2과제', 'B1과제']);
+    expect(rank([b1, a2]).map((r) => r.name)).toEqual(['A2과제', 'B1과제']);
   });
 
   it('동률이면 과제명 순으로 표시한다', () => {
-    const rows = rank([make('나', 70, 30), make('가', 70, 30)], settings);
+    const rows = rank([make('나', 70, 30), make('가', 70, 30)]);
     expect(rows.map((r) => r.name)).toEqual(['가', '나']);
   });
 
   it('미완료·영역 밖 과제는 뒤로 보내고 순위를 주지 않는다', () => {
-    const rows = rank([project({ id: 'x', name: '미완료' }), make('완료', 80, 20)], settings);
+    const rows = rank([project({ id: 'x', name: '미완료' }), make('완료', 80, 20)]);
     expect(rows.map((r) => r.name)).toEqual(['완료', '미완료']);
     expect(rows.map((r) => r.rank)).toEqual([1, null]);
   });
@@ -439,15 +456,16 @@ describe('정성평가 분포 검증', () => {
 describe('JSON 백업 검증', () => {
   const backup = (over: Record<string, unknown> = {}) => ({
     version: 1,
-    settings: defaultSettings,
     projects: [project({ id: 'a', name: '과제' })],
     ...over,
   });
 
   it('정상 백업을 통과시킨다', () => {
-    const r = validateImport(backup());
-    expect(r.projects).toHaveLength(1);
-    expect(r.settings).toEqual(defaultSettings);
+    expect(validateImport(backup()).projects).toHaveLength(1);
+  });
+
+  it('settings가 없어도 통과한다', () => {
+    expect(() => validateImport({ version: 1, projects: [] })).not.toThrow();
   });
 
   it('되돌아온 값은 원본과 참조를 공유하지 않는다', () => {
@@ -498,26 +516,26 @@ describe('JSON 백업 검증', () => {
     }
   });
 
-  it('평가 설정이 유효하지 않으면 거부한다', () => {
-    expect(() => validateImport(backup({ settings: { sorting: 'x' } }))).toThrow();
-    expect(() => validateImport(backup({ settings: undefined }))).toThrow();
-  });
-
-  it('환산식 설정이 있던 구버전 백업도 받아들이고 그 값은 무시한다', () => {
-    // 환산식을 (n−1)÷4×100으로 고정하기 전 백업에는 normalization 필드가 있다.
-    for (const legacy of ['five', 'zero', 'x']) {
-      const r = validateImport(backup({ settings: { normalization: legacy, sorting: 'region' } }));
-      expect(r.settings, legacy).toEqual({ sorting: 'region' });
-      expect(r.settings, legacy).not.toHaveProperty('normalization');
+  it('settings가 있던 구버전 백업도 받아들이고 그 값은 무시한다', () => {
+    // 환산식·정렬을 원문 근거로 고정하기 전 백업에는 settings 필드가 있다.
+    for (const legacy of [
+      { normalization: 'five', sorting: 'grade' },
+      { normalization: 'zero', sorting: 'region' },
+      { normalization: 'x', sorting: 'x' },
+      'not-an-object',
+    ]) {
+      const r = validateImport(backup({ settings: legacy }));
+      expect(r.projects, JSON.stringify(legacy)).toHaveLength(1);
+      expect(r, JSON.stringify(legacy)).not.toHaveProperty('settings');
     }
   });
 
   it('백업 → 복원이 평가 결과를 바꾸지 않는다', () => {
-    const before = rank(sampleProjects, settings);
+    const before = rank(sampleProjects);
     const round = validateImport(JSON.parse(
-      JSON.stringify({ version: 1, projects: sampleProjects, settings }),
+      JSON.stringify({ version: 1, projects: sampleProjects }),
     ));
-    const after = rank(round.projects, round.settings);
+    const after = rank(round.projects);
     expect(after.map((p) => [p.id, p.grade, p.rank]))
       .toEqual(before.map((p) => [p.id, p.grade, p.rank]));
   });

@@ -1,8 +1,5 @@
 {
   "version": 1,
-  "settings": {
-    "sorting": "grade"
-  },
   "projects": [
     {
       "id": "demo-01",
