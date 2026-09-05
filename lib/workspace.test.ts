@@ -66,6 +66,9 @@ describe('입력 제약과 구현 가정',()=>{
   expect(autoScores({world:2,marketSize:1000,growth:8}).market).toBeNull();
   expect(autoScores({marketSize:1000,growth:8}).market).toBe(3); // legacy domestic
  });
+ it('범위 오류 안내에 내부 키가 아닌 입력 이름을 쓴다',()=>{
+  expect(()=>createBackup([{...newProject('test','company'),name:'가 과제',raw:{marketSize:-1}}])).toThrow('가 과제: 정량 입력 시장규모의 범위를 확인하세요.');
+ });
  it('기술 목표 역전과 음수 비용을 백업에서 거부한다',()=>{
   const invalid:Record<string,number|null>[]=[{current:90,target:80},{years:-1},{cost:-2},{world:0.5}];
   for(const raw of invalid){

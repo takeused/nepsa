@@ -68,11 +68,15 @@ npm run dev
 ## 구조
 
 ```
-lib/nepsa.ts        도메인 로직 전부 — 지표 정의, 자동 채점, 축 점수,
-                    등급 판정, 우선순위 정렬, 백업 검증. 의존성 없는 순수 모듈.
-lib/nepsa.test.ts   회귀 테스트 (`npm test`)
-app/page.tsx        UI 전체 (Matrix / Editor / Methodology)
-app/globals.css     색 토큰 + 커스텀 스타일
+lib/nepsa.ts        도메인 로직 — 지표 정의, 자동 채점, 축 점수, 등급 판정,
+                    우선순위 정렬, 백업 검증. 의존성 없는 순수 모듈.
+lib/workspace.ts    모델 버전, 백업 생성·용량 한도, 저장 충돌 검사, 예시 추가.
+lib/analysis.ts     기여점수·영역 범위, 시나리오 비교, 평가 이력, 상세 CSV.
+lib/*.test.ts       회귀 테스트 (`npm test`)
+app/page.tsx        포트폴리오·방법론 화면과 저장·복원
+app/evaluation.tsx  공용 Matrix / Editor / 입력 위젯
+app/analysis-panel.tsx  분석·이력·비교 탭
+app/globals.css     색 토큰 + 커스텀 스타일 (라이트/다크/인쇄)
 components/ui/      shadcn 컴포넌트
 ```
 

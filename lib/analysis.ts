@@ -1,4 +1,4 @@
-import {criteria,evaluate,rank,regions,scoresFor,validateImport} from './nepsa';
+import {criteria,evaluate,rank,rawLabels,regions,scoresFor,validateImport} from './nepsa';
 import type {Project} from './nepsa';
 import {createBackup,MAX_BACKUP_BYTES,MODEL_VERSION} from './workspace';
 
@@ -38,6 +38,13 @@ export function persistHistory(storage:Pick<Storage,'getItem'|'setItem'>,key:str
  if(storage.getItem(key)!==expected)throw new Error('다른 탭의 이력이 변경되었습니다. 이력 새로 불러오기를 눌러 주세요.');
  storage.setItem(key,text);return text;
 }
+// 변경 내역에는 scores·raw·notes의 내부 키가 그대로 노출되지 않도록 화면 이름을 쓴다.
+const noteSuffix:Record<string,string>={source:'자료 출처',year:'기준연도',assumption:'평가 가정',confidence:'확신도'};
+export function fieldLabel(field:string){
+ const [id,suffix]=field.split(':');
+ const base=criteria.find(c=>c.id===id)?.name||rawLabels[id]||(id==='summary'?'평가 근거':id);
+ return suffix?`${base} ${noteSuffix[suffix]||suffix}`:base;
+}
 export function historyChanges(before:Project[],after:Project[]){
  const ranked=(ps:Project[])=>new Map((['company','research']as const).flatMap(type=>rank(ps.filter(p=>p.type===type))).map(p=>[p.id,p]));
  const a=ranked(before),b=ranked(after);
@@ -46,7 +53,7 @@ export function historyChanges(before:Project[],after:Project[]){
   if(previous&&current){
    for(const [key,label]of [['name','과제명'],['type','유형'],['mode','평가 방식'],['directReturn','직접입력 성과'],['directRisk','직접입력 위험']]as const)if(previous[key]!==current[key])changes.push(`${label}: ${previous[key]??'미입력'} → ${current[key]??'미입력'}`);
    for(const key of ['scores','raw','notes']as const){
-    for(const field of new Set([...Object.keys(previous[key]),...Object.keys(current[key])]))if(previous[key][field]!==current[key][field])changes.push(`${criteria.find(c=>c.id===field)?.name||field}: ${previous[key][field]??'미입력'} → ${current[key][field]??'미입력'}`);
+    for(const field of new Set([...Object.keys(previous[key]),...Object.keys(current[key])]))if(previous[key][field]!==current[key][field])changes.push(`${fieldLabel(field)}: ${previous[key][field]??'미입력'} → ${current[key][field]??'미입력'}`);
    }
   }
   return {id,previous,current,changes};

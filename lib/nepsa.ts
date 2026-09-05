@@ -54,6 +54,8 @@ export const ipCuts=[0,20,60,80];
 export const ipParts=[{id:'ipFilings',label:'출원증가율'},{id:'ipDomestic',label:'국내출원인 출원건수 증가율'},{id:'ipShare',label:'최근구간 점유율'},{id:'ipMarket',label:'특허 시장확보력'}] as const;
 export function hasIpInputs(raw:Project['raw']){return ipParts.some(p=>raw[p.id]!==undefined&&raw[p.id]!==null);}
 const rawLimits:Record<string,{min?:number;max?:number}>={world:{min:0,max:1},marketSize:{min:0},growth:{min:-100},margin:{},current:{min:0,max:100},target:{min:0,max:100},years:{min:0},cost:{min:0},ipFilings:{min:-100},ipDomestic:{min:-100},ipShare:{min:0,max:100},ipMarket:{min:-100}};
+// 오류 메시지에는 내부 키 대신 입력 화면과 같은 이름을 쓴다.
+export const rawLabels:Record<string,string>={world:'대상시장',marketSize:'시장규모',growth:'성장률',margin:'영업이익률',current:'현 기술수준',target:'목표 기술수준',years:'사업화 소요기간',cost:'사업화 소요비용',ipFilings:'출원증가율',ipDomestic:'국내출원인 출원건수 증가율',ipShare:'최근구간 점유율',ipMarket:'특허 시장확보력'};
 export function rawValueValid(key:string,value:unknown){
  if(!Object.hasOwn(rawLimits,key)||!isNumber(value))return false;
  const {min,max}=rawLimits[key];
@@ -126,7 +128,7 @@ export function validateImport(data:unknown):{projects:Project[]}{
   ids.add(p.id);
   for(const map of [p.scores,p.raw,p.notes])if(!map||typeof map!=='object'||Array.isArray(map))throw new Error('평가값 형식 오류');
   for(const [k,n]of Object.entries(p.scores))if(!criteria.some(c=>c.id===k)||n!==null&&(!Number.isInteger(n)||n<1||n>5))throw new Error('지표 점수는 1~5 사이의 정수여야 합니다.');
-  for(const [k,n] of Object.entries(p.raw))if(!Object.hasOwn(rawLimits,k)||n!==null&&!rawValueValid(k,n))throw new Error(`${p.name}: 정량 입력 ${k}의 범위를 확인하세요.`);
+  for(const [k,n] of Object.entries(p.raw))if(!Object.hasOwn(rawLimits,k)||n!==null&&!rawValueValid(k,n))throw new Error(`${p.name}: 정량 입력 ${rawLabels[k]||k}의 범위를 확인하세요.`);
   if(isNumber(p.raw.current)&&isNumber(p.raw.target)&&p.raw.target<p.raw.current)throw new Error(`${p.name}: 목표 기술수준은 현재 수준 이상이어야 합니다.`);
   for(const n of [p.directReturn,p.directRisk])if(n!==null&&(!isNumber(n)||n<0||n>100))throw new Error('종합점수는 0~100점이어야 합니다.');
   for(const n of Object.values(p.notes))if(typeof n!=='string'||n.length>20000)throw new Error('평가 근거 형식 오류');

@@ -1,5 +1,5 @@
 import {describe,it,expect} from 'vitest';
-import {compareScenario,contributions,csvCell,detailedCsv,historyChanges,parseHistory,parseScenarios,persistHistory,regionBounds,serializeHistory,serializeScenarios,snapshot} from './analysis';
+import {compareScenario,contributions,fieldLabel,csvCell,detailedCsv,historyChanges,parseHistory,parseScenarios,persistHistory,regionBounds,serializeHistory,serializeScenarios,snapshot} from './analysis';
 import type {ScenarioSet} from './analysis';
 import {sampleProjects,newProject,axisScore,validateImport} from './nepsa';
 
@@ -11,6 +11,7 @@ describe('분석과 원본 보존',()=>{
  it('원천기술형이 영역 밖으로 이동하면 순위를 비운다',()=>{const p={...sampleProjects[0],type:'research' as const,directReturn:95,directRisk:45};const c=compareScenario([p],{...p,directRisk:39});expect(c[0].before.region).toBe('S');expect(c[0].after.rank).toBeNull();});
  it('유형별 실제 좌표의 영역 범위를 반환한다',()=>{expect(regionBounds(sampleProjects[2])).toEqual({returnMin:75,returnMax:100,riskMin:0,riskMax:25});expect(regionBounds({...sampleProjects[2],type:'research',directReturn:95,directRisk:45})).toEqual({returnMin:90,returnMax:100,riskMin:40,riskMax:55});});
  it('영역 밖은 경계값을 제시하지 않는다',()=>expect(regionBounds({...sampleProjects[0],type:'research',directReturn:59})).toBeNull());
+ it('변경 내역은 내부 키 대신 화면 이름을 쓴다',()=>{expect(fieldLabel('marketSize')).toBe('시장규모');expect(fieldLabel('excellence')).toBe('기술적 수월성');expect(fieldLabel('ip:source')).toBe('IP 부상도 자료 출처');expect(fieldLabel('unknown')).toBe('unknown');});
 });
 describe('분석 저장 경계와 복구',()=>{
  const data=():ScenarioSet=>({version:1,kind:'nepsa-scenarios',model:'test',base:sampleProjects[0],draft:{...sampleProjects[0],directReturn:99},name:'낙관',scenarios:[{name:'비관',project:sampleProjects[0]}]});
