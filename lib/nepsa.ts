@@ -1,9 +1,11 @@
 export type ProjectType = 'company' | 'research';
-export type Settings = { normalization: 'five' | 'zero'; sorting: 'grade' | 'region' };
-// 기본 환산은 (n−1)÷4×100. ÷5×100은 산출 범위가 20~100으로 눌려 매트릭스의
-// S 영역(위험<25)과 최하단 행이 사실상 도달 불가능해진다. 원문에 산식이 없어
-// 두 방식을 모두 남기되 0~100 전 구간을 쓰는 쪽을 기본으로 둔다.
-export const defaultSettings: Settings = { normalization: 'zero', sorting: 'grade' };
+export type Settings = { sorting: 'grade' | 'region' };
+export const defaultSettings: Settings = { sorting: 'grade' };
+// 100점 환산은 (가중평균 − 1) ÷ 4 × 100 하나로 고정한다. 원문에 산식이 없어
+// 한때 ÷5×100도 선택지로 뒀으나, ÷5는 지표 최저가 1점이라 산출 범위가
+// 20~100으로 눌려 매트릭스의 S 영역(위험<25)과 최하단 행에 도달할 수 없다.
+// 자세한 근거는 README와 context-notes.md 참고.
+export const normalizationLabel = '(가중평균 − 1) ÷ 4 × 100';
 export type Project = { id: string; name: string; type: ProjectType; mode: 'direct' | 'criteria'; scores: Record<string, number | null>; raw: Record<string, number | null>; notes: Record<string, string>; directReturn: number | null; directRisk: number | null; sample?: boolean };
 export const criteria = [
  { id:'excellence',name:'기술적 수월성',axis:'return',weight:15,qualitative:true,description:'기술의 독창성 및 차별성',labels:['아주 낮음','낮음','보통','높음','매우 높음'] },
@@ -48,7 +50,7 @@ export function axisScore(p:Project,axis:'return'|'risk',settings:Settings):numb
  if(p.mode==='direct'){const n=axis==='return'?p.directReturn:p.directRisk;return isNumber(n)&&n>=0&&n<=100?n:null;}
  const scores=scoresFor(p),cs=criteria.filter(c=>c.axis===axis);
  if(cs.some(c=>!isNumber(scores[c.id])||scores[c.id]!<1||scores[c.id]!>5))return null;
- return cs.reduce((sum,c)=>sum+(settings.normalization==='five'?scores[c.id]!/5:(scores[c.id]!-1)/4)*c.weight,0);
+ return cs.reduce((sum,c)=>sum+((scores[c.id]!-1)/4)*c.weight,0);
 }
 export function classify(ret:number|null,risk:number|null,type:ProjectType){
  if(!isNumber(ret)||!isNumber(risk)||ret<0||ret>100||risk<0||risk>100)return {grade:'미완료',region:'—',eligible:false};
@@ -83,7 +85,8 @@ export function validateImport(data:unknown):{projects:Project[],settings:Settin
  const d=data as Record<string,unknown>;
  if(d.version!==1||!Array.isArray(d.projects)||d.projects.length>1000)throw new Error('버전 1의 NEPSA 백업(최대 1,000개)만 지원합니다.');
  const s=d.settings as Settings;
- if(!s||!['five','zero'].includes(s.normalization)||!['grade','region'].includes(s.sorting))throw new Error('평가 설정이 유효하지 않습니다.');
+ // 구버전 백업의 normalization 필드는 무시하고 받아들인다(환산식은 이제 고정).
+ if(!s||!['grade','region'].includes(s.sorting))throw new Error('평가 설정이 유효하지 않습니다.');
  const ids=new Set<string>();
  const projects=d.projects.map((v:unknown)=>{
   if(!v||typeof v!=='object')throw new Error('과제 형식 오류');
@@ -97,5 +100,5 @@ export function validateImport(data:unknown):{projects:Project[],settings:Settin
   for(const n of Object.values(p.notes))if(typeof n!=='string'||n.length>20000)throw new Error('평가 근거 형식 오류');
   return {id:p.id,name:p.name,type:p.type,mode:p.mode,scores:{...p.scores},raw:{...p.raw},notes:{...p.notes},directReturn:p.directReturn,directRisk:p.directRisk,sample:Boolean(p.sample)};
  });
- return {projects,settings:{normalization:s.normalization,sorting:s.sorting}};
+ return {projects,settings:{sorting:s.sorting}};
 }

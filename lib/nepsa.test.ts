@@ -15,7 +15,7 @@ import {
   scoresFor,
   validateImport,
 } from './nepsa';
-import type { Project, Settings } from './nepsa';
+import type { Project } from './nepsa';
 
 const settings = defaultSettings;
 const project = (over: Partial<Project> = {}): Project => ({
@@ -200,45 +200,34 @@ describe('100점 환산', () => {
     }
   });
 
-  it('÷5×100 방식 — 1점→20, 3점→60, 5점→100', () => {
-    const s: Settings = { ...settings, normalization: 'five' };
-    expect(axisScore(flat(1), 'return', s)).toBeCloseTo(20);
-    expect(axisScore(flat(3), 'return', s)).toBeCloseTo(60);
-    expect(axisScore(flat(5), 'return', s)).toBeCloseTo(100);
+  it('100점 환산은 (n−1)÷4×100 하나로 고정 — 1점→0, 3점→50, 5점→100', () => {
+    expect(axisScore(flat(1), 'return', settings)).toBeCloseTo(0);
+    expect(axisScore(flat(3), 'return', settings)).toBeCloseTo(50);
+    expect(axisScore(flat(5), 'return', settings)).toBeCloseTo(100);
   });
 
-  it('(n−1)÷4×100 방식 — 1점→0, 3점→50, 5점→100', () => {
-    const s: Settings = { ...settings, normalization: 'zero' };
-    expect(axisScore(flat(1), 'return', s)).toBeCloseTo(0);
-    expect(axisScore(flat(3), 'return', s)).toBeCloseTo(50);
-    expect(axisScore(flat(5), 'return', s)).toBeCloseTo(100);
+  it('0~100 전 구간을 쓴다 — S 영역과 최하단 행에 도달할 수 있다', () => {
+    // 폐기한 ÷5×100은 최저가 20점이라 S 영역(위험<25)과 최하단 행이
+    // 사실상 도달 불가능했다. 산식을 되돌리면 이 테스트가 실패한다.
+    const lowest = axisScore(flat(1), 'risk', settings)!;
+    expect(lowest).toBeCloseTo(0);
+    expect(lowest).toBeLessThan(25);
+    expect(classify(100, lowest, 'company').region).toBe('S');
+    expect(classify(axisScore(flat(1), 'return', settings)!, 100, 'company').region).toBe('D2');
   });
 
   it('가중치를 반영한다', () => {
     // 시장규모(25%)만 5점, 나머지 기대성과 지표는 1점
     const p = flat(1, { raw: { ...rawFor(1), marketSize: 6000 } });
-    // five: 5점 지표 25% × 100 + 1점 지표 75% × 20 = 25 + 15 = 40
-    expect(axisScore(p, 'return', { ...settings, normalization: 'five' })).toBeCloseTo(40);
-    // zero: 5점 지표 25% × 100 + 1점 지표 75% × 0 = 25
-    expect(axisScore(p, 'return', { ...settings, normalization: 'zero' })).toBeCloseTo(25);
+    // 5점 지표 25% × 100 + 1점 지표 75% × 0 = 25
+    expect(axisScore(p, 'return', settings)).toBeCloseTo(25);
   });
 
   it('지표가 하나라도 비면 null이다', () => {
     const p = flat(3);
     delete p.scores.impact;
     expect(axisScore(p, 'return', settings)).toBeNull();
-    expect(axisScore(p, 'risk', settings)).toBeCloseTo(50); // 기본 환산에서 3점 → 50
-  });
-
-  it('기본 환산은 (n−1)÷4×100이고 0~100 전 구간을 쓴다', () => {
-    // ÷5×100은 최저가 20점이라 매트릭스의 S 영역(위험<25)과 최하단 행에
-    // 사실상 도달할 수 없다. 기본값을 되돌리면 이 테스트가 실패한다.
-    expect(defaultSettings.normalization).toBe('zero');
-    expect(axisScore(flat(1), 'risk', defaultSettings)).toBeCloseTo(0);
-    expect(axisScore(flat(5), 'risk', defaultSettings)).toBeCloseTo(100);
-    expect(axisScore(flat(1), 'risk', { ...settings, normalization: 'five' })).toBeCloseTo(20);
-    // 전 지표 최저점인 과제가 기본 환산에서는 S 영역에 들어간다
-    expect(classify(100, axisScore(flat(1), 'risk', defaultSettings)!, 'company').region).toBe('S');
+    expect(axisScore(p, 'risk', settings)).toBeCloseTo(50);
   });
 
   it('직접 입력 모드는 0~100 범위만 받는다', () => {
@@ -470,8 +459,17 @@ describe('JSON 백업 검증', () => {
   });
 
   it('평가 설정이 유효하지 않으면 거부한다', () => {
-    expect(() => validateImport(backup({ settings: { normalization: 'x', sorting: 'grade' } }))).toThrow();
+    expect(() => validateImport(backup({ settings: { sorting: 'x' } }))).toThrow();
     expect(() => validateImport(backup({ settings: undefined }))).toThrow();
+  });
+
+  it('환산식 설정이 있던 구버전 백업도 받아들이고 그 값은 무시한다', () => {
+    // 환산식을 (n−1)÷4×100으로 고정하기 전 백업에는 normalization 필드가 있다.
+    for (const legacy of ['five', 'zero', 'x']) {
+      const r = validateImport(backup({ settings: { normalization: legacy, sorting: 'region' } }));
+      expect(r.settings, legacy).toEqual({ sorting: 'region' });
+      expect(r.settings, legacy).not.toHaveProperty('normalization');
+    }
   });
 
   it('백업 → 복원이 평가 결과를 바꾸지 않는다', () => {

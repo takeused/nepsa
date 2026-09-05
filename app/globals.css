@@ -200,6 +200,7 @@ textarea{width:100%;min-height:78px;margin-top:9px;padding:10px 12px;border:1px 
 .method-body{padding:0 24px 24px;display:flex;flex-direction:column;gap:15px}
 .method-body>p{font-size:14px;line-height:1.62}
 .setting-label{display:flex;flex-direction:column;gap:8px;font-size:13px;font-weight:600;color:var(--label)}
+.fixed-value{margin:0;padding:9px 13px;border:1px solid var(--border);border-radius:var(--radius-md);background:var(--muted);color:var(--foreground);font-size:14px;font-weight:500}
 .formula{margin-top:-6px;font-size:13px;color:var(--accent-foreground);background:var(--accent);border-radius:7px;padding:9px 13px;font-variant-numeric:tabular-nums}
 .method-list{margin:0;padding-left:19px;font-size:13.5px;color:var(--muted-foreground);line-height:1.62}
 .method-list li{margin-bottom:9px}

@@ -1,7 +1,6 @@
 {
   "version": 1,
   "settings": {
-    "normalization": "zero",
     "sorting": "grade"
   },
   "projects": [
