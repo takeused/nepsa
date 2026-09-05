@@ -10,7 +10,7 @@ export type Project = { id: string; name: string; type: ProjectType; mode: 'dire
 export const criteria = [
  { id:'excellence',name:'기술적 수월성',axis:'return',weight:15,qualitative:true,description:'기술의 독창성 및 차별성',labels:['아주 낮음','낮음','보통','높음','매우 높음'] },
  { id:'application',name:'타 분야 응용가능성',axis:'return',weight:10,qualitative:true,description:'다른 분야에 적용·활용될 가능성',labels:['아주 낮음','낮음','보통','높음','매우 높음'] },
- { id:'ip',name:'IP 부상도',axis:'return',weight:15,qualitative:false,description:'특허분석 보고서의 1~5점과 근거를 입력. 원문 기준표 미수록.',labels:[] },
+ { id:'ip',name:'IP 부상도',axis:'return',weight:15,qualitative:false,description:'특허분석 4개 항목의 구간 대비 증가율·점유율 평균. 2013년 원문에는 기준표가 없어 CODIL 보고서 표 3-10을 따릅니다.',labels:[] },
  { id:'market',name:'시장규모 및 성장률',axis:'return',weight:25,qualitative:false,description:'시장규모 점수와 성장률 점수 중 높은 점수',labels:[] },
  { id:'profit',name:'연관업종 영업이익률',axis:'return',weight:15,qualitative:false,description:'관련 업종의 영업이익률',labels:[] },
  { id:'impact',name:'파급효과',axis:'return',weight:20,qualitative:true,description:'타 산업·기술에 미치는 긍정적 외부효과',labels:['아주 낮음','낮음','보통','높음','매우 높음'] },
@@ -36,17 +36,28 @@ export const gradeTints:Record<string,string>={S:'var(--grade-s-tint)',A:'var(--
 export const gradeNone='var(--grade-none)',gradeNoneTint='var(--grade-none-tint)';
 export function isNumber(n:unknown):n is number{return typeof n==='number'&&Number.isFinite(n);}
 export function band(n:number,cuts:number[]){return cuts.filter(c=>n>=c).length+1;}
+export const ipCuts=[0,20,60,80];
+export const ipParts=[{id:'ipFilings',label:'출원증가율'},{id:'ipDomestic',label:'국내출원인 출원건수 증가율'},{id:'ipShare',label:'최근구간 점유율'},{id:'ipMarket',label:'특허 시장확보력'}] as const;
 export function autoScores(raw:Project['raw']):Record<string,number|null>{
  const valid=(...keys:string[])=>keys.every(k=>isNumber(raw[k]));
  return {
  market:valid('marketSize','growth')&&raw.marketSize!>=0?Math.max(band(raw.marketSize!,raw.world===1?[20,50,100,150]:[1000,2000,3500,5000]),band(raw.growth!,[3,8,13,20])):null,
  profit:valid('margin')?band(raw.margin!,[2,4,8,12]):null,
+ // IP 부상도 — 네 항목 모두 같은 구간표(0% 미만 / 0~20 / 20~60 / 60~80 / 80 이상)를
+ // 쓰고 평균을 사사오입한다. 2013년 원문에 기준표가 없어 CODIL 연구보고서
+ // OTKCRK230019 표 3-10 "NEPSA 중 특허평가지표"를 근거로 삼았다.
+ ip:valid('ipFilings','ipDomestic','ipShare','ipMarket')?Math.round(([raw.ipFilings!,raw.ipDomestic!,raw.ipShare!,raw.ipMarket!].reduce((t,n)=>t+band(n,ipCuts),0))/4):null,
  gap:valid('current','target')&&raw.current!>=0&&raw.current!<=100&&raw.target!>=raw.current!&&raw.target!<=100?band(raw.target!-raw.current!,raw.current!>=90?[2,4,6,8]:raw.current!>=80?[5,8,12,15]:raw.current!>=70?[10,15,20,25]:[15,20,25,30]):null,
  resources:valid('years','cost')&&raw.years!>=0&&raw.cost!>=0?Math.round((band(raw.years!,[1.5,2,2.5,3])+band(raw.cost!,[20,50,100,200]))/2):null,
  };
 }
-export function scoresFor(p:Project){return {...p.scores,...autoScores(p.raw)};}
-export function axisScore(p:Project,axis:'return'|'risk',settings:Settings):number|null{
+export function scoresFor(p:Project):Record<string,number|null>{
+ const auto=autoScores(p.raw);
+ // ip는 특허분석 4개 값이 모두 있을 때만 자동 채점하고, 없으면 직접 입력한
+ // 점수를 유지한다. 기준표 도입 이전 백업이 그대로 열리도록 하기 위함이다.
+ return {...p.scores,...auto,ip:auto.ip??p.scores.ip??null};
+}
+export function axisScore(p:Project,axis:'return'|'risk'):number|null{
  if(p.mode==='direct'){const n=axis==='return'?p.directReturn:p.directRisk;return isNumber(n)&&n>=0&&n<=100?n:null;}
  const scores=scoresFor(p),cs=criteria.filter(c=>c.axis===axis);
  if(cs.some(c=>!isNumber(scores[c.id])||scores[c.id]!<1||scores[c.id]!>5))return null;
@@ -61,9 +72,9 @@ export function classify(ret:number|null,risk:number|null,type:ProjectType){
  const region=[['S','A1','B1','B1'],['A2','B2','B2','C1'],['B3','B3','C2','D1'],['B4','C3','D2','D2']][row][col];
  return {grade:region[0],region,eligible:true};
 }
-export function evaluate(p:Project,settings:Settings){const ret=axisScore(p,'return',settings),risk=axisScore(p,'risk',settings);return {...p,ret,risk,...classify(ret,risk,p.type)};}
+export function evaluate(p:Project){const ret=axisScore(p,'return'),risk=axisScore(p,'risk');return {...p,ret,risk,...classify(ret,risk,p.type)};}
 export function rank(projects:Project[],settings:Settings){
- return projects.map(p=>evaluate(p,settings)).sort((a,b)=>{
+ return projects.map(p=>evaluate(p)).sort((a,b)=>{
   if(a.eligible!==b.eligible)return a.eligible?-1:1;
   if(!a.eligible)return a.name.localeCompare(b.name,'ko');
   const ord=(r:typeof a)=>settings.sorting==='region'?regionOrder.indexOf(r.region):['S','A','B','C','D'].indexOf(r.grade);

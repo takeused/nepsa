@@ -12,7 +12,6 @@
       "scores": {
         "excellence": 5,
         "application": 4,
-        "ip": 4,
         "impact": 5,
         "infrastructure": 2,
         "barrier": 4,
@@ -27,7 +26,11 @@
         "current": 78,
         "target": 95,
         "years": 4,
-        "cost": 300
+        "cost": 300,
+        "ipFilings": 95,
+        "ipDomestic": 130,
+        "ipShare": 42,
+        "ipMarket": 70
       },
       "notes": {
         "summary": "차세대 이차전지 핵심 소재. 기술 난도와 경쟁 모두 높음. 시연용 가상 수치입니다. 실제 시장조사·기술수준 평가 결과가 아닙니다."
@@ -44,7 +47,6 @@
       "scores": {
         "excellence": 4,
         "application": 3,
-        "ip": 5,
         "impact": 4,
         "infrastructure": 1,
         "barrier": 5,
@@ -59,7 +61,11 @@
         "current": 85,
         "target": 96,
         "years": 2.5,
-        "cost": 120
+        "cost": 120,
+        "ipFilings": 110,
+        "ipDomestic": 88,
+        "ipShare": 55,
+        "ipMarket": 92
       },
       "notes": {
         "summary": "고대역폭 메모리 후공정 소재. 선행특허 장벽이 매우 높음. 시연용 가상 수치입니다. 실제 시장조사·기술수준 평가 결과가 아닙니다."
@@ -76,7 +82,6 @@
       "scores": {
         "excellence": 3,
         "application": 4,
-        "ip": 3,
         "impact": 4,
         "infrastructure": 2,
         "barrier": 3,
@@ -91,7 +96,11 @@
         "current": 72,
         "target": 88,
         "years": 3,
-        "cost": 90
+        "cost": 90,
+        "ipFilings": 64,
+        "ipDomestic": 71,
+        "ipShare": 33,
+        "ipMarket": 45
       },
       "notes": {
         "summary": "자율주행 센서 부품. 수입 의존도 완화 목적. 시연용 가상 수치입니다. 실제 시장조사·기술수준 평가 결과가 아닙니다."
@@ -108,7 +117,6 @@
       "scores": {
         "excellence": 3,
         "application": 3,
-        "ip": 3,
         "impact": 4,
         "infrastructure": 2,
         "barrier": 3,
@@ -123,7 +131,11 @@
         "current": 80,
         "target": 92,
         "years": 2,
-        "cost": 60
+        "cost": 60,
+        "ipFilings": 38,
+        "ipDomestic": 52,
+        "ipShare": 29,
+        "ipMarket": 24
       },
       "notes": {
         "summary": "수소 상용차 확대에 연동. 국내 시장 중심. 시연용 가상 수치입니다. 실제 시장조사·기술수준 평가 결과가 아닙니다."
@@ -140,7 +152,6 @@
       "scores": {
         "excellence": 2,
         "application": 4,
-        "ip": 2,
         "impact": 3,
         "infrastructure": 1,
         "barrier": 2,
@@ -155,7 +166,11 @@
         "current": 83,
         "target": 90,
         "years": 1.5,
-        "cost": 35
+        "cost": 35,
+        "ipFilings": 12,
+        "ipDomestic": 18,
+        "ipShare": 22,
+        "ipMarket": 9
       },
       "notes": {
         "summary": "단기 상용화 가능. 기술 차별성은 크지 않음. 시연용 가상 수치입니다. 실제 시장조사·기술수준 평가 결과가 아닙니다."
@@ -172,7 +187,6 @@
       "scores": {
         "excellence": 4,
         "application": 5,
-        "ip": 3,
         "impact": 5,
         "infrastructure": 3,
         "barrier": 3,
@@ -187,7 +201,11 @@
         "current": 70,
         "target": 90,
         "years": 4,
-        "cost": 250
+        "cost": 250,
+        "ipFilings": 58,
+        "ipDomestic": 44,
+        "ipShare": 31,
+        "ipMarket": 63
       },
       "notes": {
         "summary": "CDMO 경쟁력 직결. 응용 범위가 넓음. 시연용 가상 수치입니다. 실제 시장조사·기술수준 평가 결과가 아닙니다."
@@ -204,7 +222,6 @@
       "scores": {
         "excellence": 4,
         "application": 3,
-        "ip": 3,
         "impact": 5,
         "infrastructure": 3,
         "barrier": 2,
@@ -219,7 +236,11 @@
         "current": 68,
         "target": 85,
         "years": 5,
-        "cost": 180
+        "cost": 180,
+        "ipFilings": 81,
+        "ipDomestic": 96,
+        "ipShare": 27,
+        "ipMarket": 35
       },
       "notes": {
         "summary": "탄소중립 정책 의존도 높음. 수익성은 아직 낮음. 시연용 가상 수치입니다. 실제 시장조사·기술수준 평가 결과가 아닙니다."
@@ -236,7 +257,6 @@
       "scores": {
         "excellence": 2,
         "application": 1,
-        "ip": 2,
         "impact": 2,
         "infrastructure": 1,
         "barrier": 1,
@@ -251,7 +271,11 @@
         "current": 92,
         "target": 96,
         "years": 1,
-        "cost": 15
+        "cost": 15,
+        "ipFilings": 7,
+        "ipDomestic": 11,
+        "ipShare": 19,
+        "ipMarket": 4
       },
       "notes": {
         "summary": "기존 라인 개선형. 성과는 작지만 위험도 낮음. 시연용 가상 수치입니다. 실제 시장조사·기술수준 평가 결과가 아닙니다."
@@ -268,7 +292,6 @@
       "scores": {
         "excellence": 1,
         "application": 1,
-        "ip": 1,
         "impact": 1,
         "infrastructure": 1,
         "barrier": 1,
@@ -283,7 +306,11 @@
         "current": 95,
         "target": 97,
         "years": 1,
-        "cost": 10
+        "cost": 10,
+        "ipFilings": -6,
+        "ipDomestic": -3,
+        "ipShare": 14,
+        "ipMarket": -8
       },
       "notes": {
         "summary": "성숙·쇠퇴 시장. 차별성이 거의 없음. 시연용 가상 수치입니다. 실제 시장조사·기술수준 평가 결과가 아닙니다."
@@ -300,7 +327,6 @@
       "scores": {
         "excellence": 4,
         "application": 2,
-        "ip": 5,
         "impact": 3,
         "infrastructure": 1,
         "barrier": 1,
@@ -315,7 +341,11 @@
         "current": 88,
         "target": 93,
         "years": 1.5,
-        "cost": 25
+        "cost": 25,
+        "ipFilings": 46,
+        "ipDomestic": 62,
+        "ipShare": 26,
+        "ipMarket": 51
       },
       "notes": {
         "summary": "틈새 독점 구조. 고수익·저경쟁. 시연용 가상 수치입니다. 실제 시장조사·기술수준 평가 결과가 아닙니다."
@@ -332,7 +362,6 @@
       "scores": {
         "excellence": 2,
         "application": 2,
-        "ip": 2,
         "impact": 3,
         "infrastructure": 2,
         "barrier": 3,
@@ -347,7 +376,11 @@
         "current": 86,
         "target": 92,
         "years": 2,
-        "cost": 45
+        "cost": 45,
+        "ipFilings": 15,
+        "ipDomestic": 9,
+        "ipShare": 24,
+        "ipMarket": 12
       },
       "notes": {
         "summary": "중국계 경쟁이 과열. 수익성 압박. 시연용 가상 수치입니다. 실제 시장조사·기술수준 평가 결과가 아닙니다."
@@ -364,7 +397,6 @@
       "scores": {
         "excellence": 5,
         "application": 5,
-        "ip": 3,
         "impact": 5,
         "infrastructure": 4,
         "barrier": 3,
@@ -379,7 +411,11 @@
         "current": 45,
         "target": 80,
         "years": 5,
-        "cost": 400
+        "cost": 400,
+        "ipFilings": 120,
+        "ipDomestic": 140,
+        "ipShare": 48,
+        "ipMarket": 88
       },
       "notes": {
         "summary": "성공 시 파급효과가 매우 크나 기술격차가 극단적으로 큼. 시연용 가상 수치입니다. 실제 시장조사·기술수준 평가 결과가 아닙니다."
@@ -396,7 +432,6 @@
       "scores": {
         "excellence": 5,
         "application": 4,
-        "ip": 4,
         "impact": 5,
         "infrastructure": 4,
         "barrier": 4,
@@ -411,7 +446,11 @@
         "current": 55,
         "target": 85,
         "years": 5,
-        "cost": 350
+        "cost": 350,
+        "ipFilings": 97,
+        "ipDomestic": 115,
+        "ipShare": 44,
+        "ipMarket": 76
       },
       "notes": {
         "summary": "원천기술 확보 목적. 국내 인프라가 미흡. 시연용 가상 수치입니다. 실제 시장조사·기술수준 평가 결과가 아닙니다."

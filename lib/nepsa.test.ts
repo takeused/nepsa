@@ -146,6 +146,27 @@ describe('정량지표 자동 채점 (원문 21~22쪽)', () => {
     expect(score({ current: 89, target: 97 }, 'gap')).toBe(3);
   });
 
+  it('IP 부상도 — 네 항목 공통 구간 0/20/60/80 (CODIL 표 3-10)', () => {
+    const at = (n: number) =>
+      score({ ipFilings: n, ipDomestic: n, ipShare: n, ipMarket: n }, 'ip');
+    expect([at(-0.1), at(0), at(19.9), at(20)]).toEqual([1, 2, 2, 3]);
+    expect([at(59.9), at(60), at(79.9), at(80)]).toEqual([3, 4, 4, 5]);
+  });
+
+  it('IP 부상도 — 원 보고서의 실측 사례를 재현한다', () => {
+    // CODIL OTKCRK230019 표 3-10 및 본문: 출원증가율 72%, 국내출원인 124%,
+    // 최근구간 점유율 38%, 시장확보력 48% → 각 4·5·3·3점, 평균 3.75 → 4점.
+    // 보고서는 이를 "높은 수준의 IP 부상도"(=높음=4점)로 서술한다.
+    expect(score({ ipFilings: 72, ipDomestic: 124, ipShare: 38, ipMarket: 48 }, 'ip')).toBe(4);
+    // 본문이 38%를 "보통수준의 점유율"이라 적은 것과 3점이 일치한다.
+    expect(score({ ipFilings: 38, ipDomestic: 38, ipShare: 38, ipMarket: 38 }, 'ip')).toBe(3);
+  });
+
+  it('IP 부상도 — 네 항목이 다 있어야 자동 채점한다', () => {
+    expect(score({ ipFilings: 50, ipDomestic: 50, ipShare: 50 }, 'ip')).toBeNull();
+    expect(autoScores({}).ip).toBeNull();
+  });
+
   it('사업화 요구자원 — 기간·비용 점수의 평균을 사사오입한다', () => {
     const at = (years: number, cost: number) => score({ years, cost }, 'resources');
     // 기간 1점(1년) + 비용 1점(10억) → 1
@@ -165,6 +186,25 @@ describe('정량지표 자동 채점 (원문 21~22쪽)', () => {
     expect(autoScores({ current: -1, target: 50 }).gap).toBeNull();
     expect(autoScores({ current: 50, target: 101 }).gap).toBeNull();
     expect(autoScores({ years: -1, cost: 10 }).resources).toBeNull();
+  });
+});
+
+describe('IP 부상도 수동 입력 하위 호환', () => {
+  it('특허분석 수치가 없으면 직접 입력한 점수를 유지한다', () => {
+    const p = project({ scores: { ip: 4 }, raw: {} });
+    expect(scoresFor(p).ip).toBe(4);
+  });
+
+  it('특허분석 수치가 있으면 자동 채점이 직접 입력을 덮어쓴다', () => {
+    const p = project({
+      scores: { ip: 1 },
+      raw: { ipFilings: 72, ipDomestic: 124, ipShare: 38, ipMarket: 48 },
+    });
+    expect(scoresFor(p).ip).toBe(4);
+  });
+
+  it('둘 다 없으면 null이다', () => {
+    expect(scoresFor(project()).ip).toBeNull();
   });
 });
 
@@ -201,38 +241,38 @@ describe('100점 환산', () => {
   });
 
   it('100점 환산은 (n−1)÷4×100 하나로 고정 — 1점→0, 3점→50, 5점→100', () => {
-    expect(axisScore(flat(1), 'return', settings)).toBeCloseTo(0);
-    expect(axisScore(flat(3), 'return', settings)).toBeCloseTo(50);
-    expect(axisScore(flat(5), 'return', settings)).toBeCloseTo(100);
+    expect(axisScore(flat(1), 'return')).toBeCloseTo(0);
+    expect(axisScore(flat(3), 'return')).toBeCloseTo(50);
+    expect(axisScore(flat(5), 'return')).toBeCloseTo(100);
   });
 
   it('0~100 전 구간을 쓴다 — S 영역과 최하단 행에 도달할 수 있다', () => {
     // 폐기한 ÷5×100은 최저가 20점이라 S 영역(위험<25)과 최하단 행이
     // 사실상 도달 불가능했다. 산식을 되돌리면 이 테스트가 실패한다.
-    const lowest = axisScore(flat(1), 'risk', settings)!;
+    const lowest = axisScore(flat(1), 'risk')!;
     expect(lowest).toBeCloseTo(0);
     expect(lowest).toBeLessThan(25);
     expect(classify(100, lowest, 'company').region).toBe('S');
-    expect(classify(axisScore(flat(1), 'return', settings)!, 100, 'company').region).toBe('D2');
+    expect(classify(axisScore(flat(1), 'return')!, 100, 'company').region).toBe('D2');
   });
 
   it('가중치를 반영한다', () => {
     // 시장규모(25%)만 5점, 나머지 기대성과 지표는 1점
     const p = flat(1, { raw: { ...rawFor(1), marketSize: 6000 } });
     // 5점 지표 25% × 100 + 1점 지표 75% × 0 = 25
-    expect(axisScore(p, 'return', settings)).toBeCloseTo(25);
+    expect(axisScore(p, 'return')).toBeCloseTo(25);
   });
 
   it('지표가 하나라도 비면 null이다', () => {
     const p = flat(3);
     delete p.scores.impact;
-    expect(axisScore(p, 'return', settings)).toBeNull();
-    expect(axisScore(p, 'risk', settings)).toBeCloseTo(50);
+    expect(axisScore(p, 'return')).toBeNull();
+    expect(axisScore(p, 'risk')).toBeCloseTo(50);
   });
 
   it('직접 입력 모드는 0~100 범위만 받는다', () => {
     const direct = (n: number | null) =>
-      axisScore(project({ mode: 'direct', directReturn: n }), 'return', settings);
+      axisScore(project({ mode: 'direct', directReturn: n }), 'return');
     expect(direct(70.83)).toBe(70.83);
     expect(direct(101)).toBeNull();
     expect(direct(-1)).toBeNull();
@@ -490,7 +530,7 @@ describe('반올림 정책', () => {
   it('등급은 반올림 전 값으로 판정한다', () => {
     // 74.999…는 표시상 75.00이지만 등급은 아래 행이어야 한다.
     const p = project({ mode: 'direct', directReturn: 74.999, directRisk: 10 });
-    const r = evaluate(p, settings);
+    const r = evaluate(p);
     expect(r.ret!.toFixed(2)).toBe('75.00');
     expect(r.region).toBe('A2');
   });
