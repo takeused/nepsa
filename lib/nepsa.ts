@@ -32,6 +32,9 @@ export const regions = [
  {name:'B3',x:0,y:25,w:50,h:25},{name:'C2',x:50,y:25,w:25,h:25},{name:'D1',x:75,y:25,w:25,h:25},
  {name:'B4',x:0,y:0,w:25,h:25},{name:'C3',x:25,y:0,w:25,h:25},{name:'D2',x:50,y:0,w:50,h:25},
 ];
+// 4x4 격자 배치. classify()와 개요 화면의 미니 매트릭스가 같은 출처를 보도록 여기서만 정의한다.
+// 행은 기대성과 높은 쪽(위)부터, 열은 위험 낮은 쪽(왼쪽)부터다.
+export const regionGrid=[['S','A1','B1','B1'],['A2','B2','B2','C1'],['B3','B3','C2','D1'],['B4','C3','D2','D2']];
 export const regionOrder=['S','A1','A2','B1','B2','B3','B4','C1','C2','C3','D1','D2'];
 // 색상값은 app/globals.css의 토큰을 참조한다. 라이트/다크 전환을 CSS가 처리하도록
 // 하드코딩 hex 대신 var()를 쓴다. SVG에서는 presentation attribute가 아니라
@@ -92,7 +95,7 @@ export function classify(ret:number|null,risk:number|null,type:ProjectType){
  const y=type==='research'?(ret-60)/40*100:ret,x=type==='research'?(risk-40)/60*100:risk;
  // Equality: higher Return row, right-hand Risk column. Declared implementation assumption.
  const row=y>=75?0:y>=50?1:y>=25?2:3,col=x>=75?3:x>=50?2:x>=25?1:0;
- const region=[['S','A1','B1','B1'],['A2','B2','B2','C1'],['B3','B3','C2','D1'],['B4','C3','D2','D2']][row][col];
+ const region=regionGrid[row][col];
  return {grade:region[0],region,eligible:true};
 }
 export function evaluate(p:Project){const ret=axisScore(p,'return'),risk=axisScore(p,'risk');return {...p,ret,risk,...classify(ret,risk,p.type)};}

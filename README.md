@@ -4,6 +4,8 @@ R&D 기획과제를 **기대성과(Return)** 와 **위험(Risk)** 두 축으로 
 
 과제마다 12개 지표를 입력하면 100점 환산 점수 두 개가 나오고, 그 좌표가 12개 영역 매트릭스 위에서 S~D 등급과 순위로 이어집니다.
 
+NEPSA는 보고서 18쪽(인쇄 098쪽)에 `Nest yEar Projects Selection Analysis`로 풀려 있습니다. 문맥상 "Next Year"의 오타로 보이지만 표기는 원문을 따랐습니다. 방법론 자체를 설명하는 화면은 앱의 **NEPSA란?** 탭에 있습니다.
+
 > **비공식 재현입니다.** KEIT와 무관하며, 공개된 2013년 보고서만 보고 구현했습니다. 세부 산식이 현재 KEIT 실무 기준과 같다는 보장은 없습니다. 실제 과제 평가에 쓰기 전에 반드시 원문과 최신 지침을 확인하세요.
 
 | 라이트 | 다크 |
@@ -74,6 +76,7 @@ lib/workspace.ts    모델 버전, 백업 생성·용량 한도, 저장 충돌 �
 lib/analysis.ts     기여점수·영역 범위, 시나리오 비교, 평가 이력, 상세 CSV.
 lib/*.test.ts       회귀 테스트 (`npm test`)
 app/page.tsx        포트폴리오·방법론 화면과 저장·복원
+app/overview.tsx    'NEPSA란?' 탭 — 방법론 개요와 용어 설명
 app/evaluation.tsx  공용 Matrix / Editor / 입력 위젯
 app/analysis-panel.tsx  분석·이력·비교 탭
 app/globals.css     색 토큰 + 커스텀 스타일 (라이트/다크/인쇄)

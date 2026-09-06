@@ -209,6 +209,28 @@ vendored 코드(`components/ui/**`, `hooks/use-mobile.ts`)는 shadcn/ui에서 �
 
 `npm run lint` 오류 0개.
 
+## NEPSA 개요 탭 (2026-09-06)
+
+"NEPSA가 뭔지 모르겠다"는 요청으로 `app/overview.tsx`를 추가했다. 첫 번째 탭이다.
+
+**약어 풀이를 원문에서 찾았다.** 지금까지 이 저장소 어디에도 NEPSA가 무엇의 약자인지 적혀 있지 않았다. PDF 18쪽(인쇄 098쪽)에 `NEPSA(Nest yEar Projects Selection Analysis)`로 실려 있다. `Nest yEar`는 문맥상 `Next Year`의 오타로 보이지만 **원문 표기를 그대로 옮기고 추정임을 밝혔다.** 임의로 고쳐 쓰면 출처를 확인하려는 사람이 원문에서 같은 문자열을 못 찾는다.
+
+**지표 묶음도 원문에서 가져왔다.** 20쪽에 기대성과가 Output(1차 성과) → Outcome(2차 성과) → Impact로, 위험이 Technology Risk → Market Risk로 묶여 있다. 이 묶음은 `lib/nepsa.ts`의 `criteria`에 없던 정보라 `overview.tsx`의 로컬 맵으로 뒀다. 도메인 로직이 쓰지 않는 표시 전용 정보를 순수 모듈에 넣지 않기 위해서다.
+
+**`regionGrid`를 export로 뽑았다.** 개요의 미니 매트릭스와 `classify()`가 같은 4x4 배치를 봐야 하는데, 배열을 복사해 두면 한쪽만 고쳐질 수 있다. `classify()` 안의 리터럴을 `lib/nepsa.ts`의 `regionGrid`로 올리고 양쪽이 참조한다.
+
+**설명 수위.** 대상 독자가 방법론을 모르는 사람이라 등산 코스 비유, "잘 되면 얼마나 좋은가 / 얼마나 어려운가" 같은 평문을 앞에 두고, 산식과 근거는 기존 '평가 기준·출처' 탭으로 넘겼다. 두 탭이 같은 내용을 반복하지 않게 개요에서는 결론만 말하고 근거는 링크로 넘긴다.
+
+### 모바일 가로 넘침 — 개요 탭이 드러낸 기존 버그
+
+개요 표(5열)를 넣자 375px 폭에서 문서 `scrollWidth`가 1358px까지 벌어졌다. 추적해 보니 원인은 표가 아니라 `.workspace`였다.
+
+`main.workbench`는 세로 flex이고 `.workspace`에 `margin:auto`가 걸려 있다. **가로 margin이 auto면 flex 자식의 stretch가 꺼지고 shrink-to-fit으로 크기가 정해져, 내용이 넓으면 컨테이너보다 커진다.** 그래서 안쪽에 넓은 표가 하나만 있어도 페이지 전체가 밀렸다. 개요 탭 이전에도 `keepMounted`인 분석 탭 때문에 375px에서 556px까지 넘치고 있었다 — 개요 탭은 이걸 눈에 띄게 키웠을 뿐이다.
+
+`.workspace`에 `width:100%`를 줘서 화면 폭에 고정했다. 넓은 표는 이미 있는 방식대로(`.chart-scroll`, `.comparison-scroll`) 각자의 `overflow-x:auto` 컨테이너 안에서 가로 스크롤한다. 개요 표도 `.overview-scroll`로 감쌌다. 탭이 4개가 되면서 탭 목록도 375px에 안 들어가 좁은 화면에서만 가로 스크롤을 걸었다.
+
+결과: 375px 초과분 1358px → 388px. 남은 13px은 `.page-heading .actions`의 버튼 3개다. 개요 탭과 무관한 기존 문제라 손대지 않고 `checklist.md`에 남겼다.
+
 ## 남은 것
 
 `checklist.md` 참고.
