@@ -21,7 +21,7 @@ export default function Overview(){
  return <div className="overview">
  <section className="panel"><div className="panel-title"><h2>한 문장으로</h2><Compass size={20}/></div><div className="method-body">
   <p className="lead">NEPSA는 <strong>내년에 시작할 R&amp;D 과제 후보들을 같은 잣대로 채점해 순서를 매기는 방법</strong>입니다. &ldquo;잘 되면 얼마나 좋은가&rdquo;와 &ldquo;얼마나 어려운가&rdquo; 두 가지를 따로 묻고, 그 답을 좌표 위의 점으로 찍어 등급을 붙입니다.</p>
-  <div className="definition"><span className="source-tag">이름 풀이</span><p><strong>NEPSA</strong> = <em>Nest yEar Projects Selection Analysis</em>. 2013년 KEIT 보고서 18쪽(인쇄 098쪽)에 이렇게 적혀 있습니다. 문맥상 &ldquo;Next Year&rdquo;를 뜻하는 것으로 보이지만 표기는 원문 그대로 옮겼습니다.</p></div>
+  <div className="definition"><span className="source-tag">이름 풀이</span><p><strong>NEPSA</strong> = <em>Nest yEar Projects Selection Analysis</em>. 2013년 KEIT 보고서 18쪽(인쇄 098쪽)에 이렇게 적혀 있습니다. 문맥상 &ldquo;Next Year&rdquo;를 뜻하는 것으로 보이지만 표기는 원문 그대로 옮겼습니다. 다른 기관 자료는 같은 약어를 <em>NExt Project Selection Analysis</em>로 풉니다(KISTEP 2017, 국토교통과학기술진흥원 2021). 어느 쪽이 공식 표기인지는 확인되지 않았습니다.</p></div>
   <div className="keypoints">
    <div className="keypoint"><Scale size={18}/><strong>두 축으로 본다</strong><p>기대성과(Return)와 위험(Risk). 각각 0~100점입니다.</p></div>
    <div className="keypoint"><Layers size={18}/><strong>12개 지표로 채운다</strong><p>축마다 6개씩. 가중평균해 축 점수를 만듭니다.</p></div>
